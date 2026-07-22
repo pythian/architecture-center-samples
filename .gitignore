@@ -25,3 +25,9 @@ exascale_outputs.*
 # Ignore key files
 *.pem
 *.pub
+
+# ExaScale secrets & generated files 
+.grid_image_id
+exadb_private_key.pem
+exadb_public_key.pub
+exascale_outputs.yaml
