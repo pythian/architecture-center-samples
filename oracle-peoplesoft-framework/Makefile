@@ -8,7 +8,7 @@ PROJECT_SA_EMAIL := ps-project-service-account@$(PROJECT_ID).iam.gserviceaccount
 # --- ExaScale grid image settings (added for PeopleSoft on ExaScale) ---
 GRID_LOCATION        ?= northamerica-northeast2
 GRID_ZONE_ID         ?= northamerica-northeast2-a-r2
-GRID_DESIRED_VERSION ?= 19.30.0.0.0
+GRID_DESIRED_VERSION ?= 19.32.0.0.0
 GRID_IMAGE_FILE      ?= .grid_image_id
 
 

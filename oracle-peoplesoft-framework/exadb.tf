@@ -281,7 +281,7 @@ resource "null_resource" "exascale_db_provisioning" {
 {
   "vmClusterId": "$CLUSTER_OCID",
   "displayName": "Home_19c_$CDB_NAME_RAW",
-  "dbVersion": "19.30.0.0",
+  "dbVersion": "19.32.0.0",
   "source": "VM_CLUSTER_NEW",
   "database": {
     "adminPassword": "${try(random_password.admin_password[0].result, "")}",
