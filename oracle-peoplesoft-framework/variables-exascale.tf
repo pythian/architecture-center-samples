@@ -70,6 +70,12 @@ variable "exascale_grid_image_id" {
   default     = ""
 }
 
+variable "exascale_grid_version" {
+  description = "GI/grid version string, e.g. 19.32.0.0.0, supplied by the Makefile. The dbHome dbVersion is derived from this so no version is hardcoded."
+  type        = string
+  default     = ""
+}
+
 variable "exascale_node_count" {
   description = "Number of nodes in the VM cluster"
   type        = number

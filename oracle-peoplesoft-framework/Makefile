@@ -8,8 +8,9 @@ PROJECT_SA_EMAIL := ps-project-service-account@$(PROJECT_ID).iam.gserviceaccount
 # --- ExaScale grid image settings (added for PeopleSoft on ExaScale) ---
 GRID_LOCATION        ?= northamerica-northeast2
 GRID_ZONE_ID         ?= northamerica-northeast2-a-r2
-GRID_DESIRED_VERSION ?= 19.32.0.0.0
+GRID_DESIRED_VERSION ?=
 GRID_IMAGE_FILE      ?= .grid_image_id
+GRID_VERSION_FILE    ?= .grid_version
 
 
 # Directory for Terraform
@@ -162,9 +163,9 @@ deploy_oracle_peoplesoft_scripts:
 # ===========================================================================
 
 prompt_grid_vars:
-	@if [ ! -f $(GRID_IMAGE_FILE) ]; then \
+	@if [ ! -f $(GRID_IMAGE_FILE) ] || [ ! -f $(GRID_VERSION_FILE) ]; then \
 		echo "-----------------------------------------------------------------"; \
-		echo "Grid Image ID not found. Starting configuration..."; \
+		echo "Grid image/version not cached. Starting configuration..."; \
 		echo "Examples:"; \
 		echo "  Location: northamerica-northeast2, us-east4, europe-west3"; \
 		echo "  Zone ID:  northamerica-northeast2-a-r2, us-east4-b-r2"; \
@@ -175,41 +176,52 @@ prompt_grid_vars:
 		ZONE=$${zone:-$(GRID_ZONE_ID)}; \
 		$(MAKE) fetch_grid_image_id GRID_LOCATION=$$LOC GRID_ZONE_ID=$$ZONE; \
 	else \
-		echo "Using existing Grid Image ID from $(GRID_IMAGE_FILE): $$(cat $(GRID_IMAGE_FILE))"; \
+		echo "Using cached grid image $$(cat $(GRID_IMAGE_FILE)) (version $$(cat $(GRID_VERSION_FILE)))"; \
 	fi
 
 fetch_grid_image_id:
-	@echo "Fetching gridImageId for version $(GRID_DESIRED_VERSION) in $(GRID_ZONE_ID)..."
+	@echo "Querying available 19c GRID versions in $(GRID_ZONE_ID)..."
 	@ACCESS_TOKEN=$$(gcloud auth print-access-token); \
 	if [ -z "$$ACCESS_TOKEN" ]; then echo "Error: Failed to get gcloud token"; exit 1; fi; \
 	RESULT=$$(curl -sG -X GET \
 		-H "Authorization: Bearer $$ACCESS_TOKEN" \
 		--data-urlencode 'filter=shape_family="EXADB_XS" AND gcp_oracle_zone_id="$(GRID_ZONE_ID)"' \
 		"https://oracledatabase.googleapis.com/v1/projects/$(PROJECT_ID)/locations/$(GRID_LOCATION)/giVersions/19.0.0.0/minorVersions"); \
-	ID=$$(echo $$RESULT | jq -r --arg version "$(GRID_DESIRED_VERSION)" '.minorVersions[] | select(.version == $$version) | .gridImageId'); \
-	if [ "$$ID" = "null" ] || [ -z "$$ID" ]; then \
-		echo "Error: No gridImageId found for version $(GRID_DESIRED_VERSION). API Response: $$RESULT"; \
+	if [ -z "$(GRID_DESIRED_VERSION)" ]; then \
+		SELECTED=$$(echo "$$RESULT" | jq -c '.minorVersions | sort_by(.version | split(".") | map(tonumber)) | last'); \
+	else \
+		SELECTED=$$(echo "$$RESULT" | jq -c --arg v "$(GRID_DESIRED_VERSION)" '.minorVersions[] | select(.version == $$v)'); \
+	fi; \
+	ID=$$(echo "$$SELECTED" | jq -r '.gridImageId // empty'); \
+	VER=$$(echo "$$SELECTED" | jq -r '.version // empty'); \
+	if [ -z "$$ID" ] || [ -z "$$VER" ]; then \
+		echo "Error: could not determine grid image/version (wanted: '$(GRID_DESIRED_VERSION)', empty = latest)."; \
+		echo "API Response: $$RESULT"; \
 		exit 1; \
 	fi; \
-	echo "$$ID" > $(GRID_IMAGE_FILE)
-	@echo "Successfully fetched gridImageId: $$ID"
+	echo "$$ID"  > $(GRID_IMAGE_FILE); \
+	echo "$$VER" > $(GRID_VERSION_FILE); \
+	echo "Selected GRID version : $$VER"; \
+	echo "Grid image ID         : $$ID"
 
 clean_grid_id:
-	rm -f $(GRID_IMAGE_FILE)
+	rm -f $(GRID_IMAGE_FILE) $(GRID_VERSION_FILE)
 
 exascale_plan: prompt_grid_vars
 	terraform -chdir=$(TF_DIR) plan \
 		-var="project_id=$(PROJECT_ID)" \
 		-var="project_service_account_email=$(PROJECT_SA_EMAIL)" \
 		-var="oracle_peoplesoft_exascale=true" \
-		-var="exascale_grid_image_id=$$(cat $(GRID_IMAGE_FILE))"
+		-var="exascale_grid_image_id=$$(cat $(GRID_IMAGE_FILE))" \
+		-var="exascale_grid_version=$$(cat $(GRID_VERSION_FILE))"
 
 exascale_deploy: prompt_grid_vars
 	terraform -chdir=$(TF_DIR) apply -auto-approve \
 		-var="project_id=$(PROJECT_ID)" \
 		-var="project_service_account_email=$(PROJECT_SA_EMAIL)" \
 		-var="oracle_peoplesoft_exascale=true" \
-		-var="exascale_grid_image_id=$$(cat $(GRID_IMAGE_FILE))"
+		-var="exascale_grid_image_id=$$(cat $(GRID_IMAGE_FILE))" \
+		-var="exascale_grid_version=$$(cat $(GRID_VERSION_FILE))"
 
 exascale_destroy:
 	@if [ ! -f $(GRID_IMAGE_FILE) ]; then \
@@ -220,6 +232,7 @@ exascale_destroy:
 		-var="project_service_account_email=$(PROJECT_SA_EMAIL)" \
 		-var="oracle_peoplesoft_exascale=true" \
 		-var="exascale_grid_image_id=$$(cat $(GRID_IMAGE_FILE))" \
+		-var="exascale_grid_version=$$(cat $(GRID_VERSION_FILE))" \
 		-var="exascale_deletion_protection=false"
 	@if [ "$$(cat $(GRID_IMAGE_FILE))" = "dummy-id" ]; then \
 		rm -f $(GRID_IMAGE_FILE); \

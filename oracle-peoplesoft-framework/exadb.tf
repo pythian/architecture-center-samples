@@ -1,3 +1,9 @@
+locals {
+  # Derive dbHome DB version from the auto-fetched grid version:
+  # 19.32.0.0.0 -> 19.32.0.0 (first four dotted fields); fallback 19.32.0.0
+  exascale_db_version = var.exascale_grid_version != "" ? join(".", slice(split(".", var.exascale_grid_version), 0, 4)) : "19.32.0.0"
+}
+
 resource "tls_private_key" "exadb_ssh_key" {
   count     = var.oracle_peoplesoft_exascale ? 1 : 0
   algorithm = "RSA"
@@ -281,7 +287,7 @@ resource "null_resource" "exascale_db_provisioning" {
 {
   "vmClusterId": "$CLUSTER_OCID",
   "displayName": "Home_19c_$CDB_NAME_RAW",
-  "dbVersion": "19.32.0.0",
+  "dbVersion": "${local.exascale_db_version}",
   "source": "VM_CLUSTER_NEW",
   "database": {
     "adminPassword": "${try(random_password.admin_password[0].result, "")}",
