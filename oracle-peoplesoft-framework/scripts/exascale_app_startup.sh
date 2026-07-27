@@ -24,9 +24,6 @@ dnf install -y google-cloud-cli
 gcloud --version
 gcloud storage ls
 
-# disable SE LINUx
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-
 # disable IPV6
 sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
 sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
@@ -41,39 +38,45 @@ dnf install jq tmux gcc gcc-c++ elfutils-libelf-devel fontconfig-devel libXrende
 # dnf cleanup
 dnf clean all
 
-# disable firewall
-systemctl stop firewalld
-systemctl disable firewalld
-
-if [ ! -f /swapfile ]; then
-    fallocate -l 20G /swapfile
-    chmod 600 /swapfile
-    mkswap /swapfile
-    swapon /swapfile
-    echo '/swapfile none swap sw 0 0' >> /etc/fstab
-fi
-
-# dir precreate and ownerships
+# dir precreate and owberships
 mkdir -v -p /u01 /u02
 chown oracle:oinstall /u01
-chown applmgr:oinstall /u02 
+chown oracle:oinstall /u02
 
-# OEL8 FIX
-# separate tasks for vision vs non-vision
-# vision requires hostname change
-# customer env requires tmux install to have long runnings sessions to attach
-if [ "$(hostname)" != "apps" ]; then
-    hostnamectl set-hostname apps
-fi
+# for customer data
+mkdir -p /opt/oracle
+chown -Rf oracle:oinstall /opt/oracle
 
-[ -f /etc/profile.d/modules.sh ] && mv /etc/profile.d/modules.sh /etc/profile.d/modules.sh.back
-[ -f /etc/profile.d/scl-init.sh ] && mv /etc/profile.d/scl-init.sh /etc/profile.d/scl-init.sh.mack
-[ -f /etc/profile.d/which2.sh ] && mv /etc/profile.d/which2.sh /etc/profile.d/which2.sh.back
+# Peoplesoft directories for PUM preinstall prerequisites
+mkdir -pv  /u01/install/ /ds2 /srv/dpk/oracle /ds2/dpk/PT862P05B_2509240500-retail-orasrvlnx/oracleserver-2623528/oracle-server/product/19.3.0.0/bin/ /u02/db/oracle-server/admin/CDBCRM/adump
+chown -Rf oracle:oinstall /u02 /u01 /ds2 /srv/
+touch  /etc/oratab
+chown  oracle:oinstall /etc/oratab
 
-[ ! -L /usr/lib/libXm.so.2 ] && ln -s /usr/lib/libXm.so.4.0.4 /usr/lib/libXm.so.2
+# remove profiles
+mv -v /etc/profile.d/modules.sh /etc/profile.d/modules.sh.back
+mv -v /etc/profile.d/scl-init.sh /etc/profile.d/scl-init.sh.back
+mv -v /etc/profile.d/which2.sh /etc/profile.d/which2.sh.back
 
-# unset which for oracle (Preinstall RPM install oracle)
+# link libs
+ln -s /usr/lib/libXm.so.4.0.4 /usr/lib/libXm.so.2
+
+# unset witch for oracle (Preinstall RPM install oracle)
 if [[ $(grep which /home/oracle/.bash_profile | wc -l) -eq 0 ]]; then echo "unset which" >> /home/oracle/.bash_profile ; fi
+
+# function to source env on 
+if [[ $(grep funct.sh /home/oracle/.bash_profile | wc -l) -eq 0 ]]; then echo "source /scripts/funct.sh" >> /home/oracle/.bash_profile ; fi
+
+# swap | 20g
+fallocate -l 20G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+# Make it persistent by adding it to /etc/fstab (if not already there)
+if ! grep -q '/swapfile' /etc/fstab; then
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
 
 echo "Configuring Exascale Cluster Access for Oracle user..."
 
