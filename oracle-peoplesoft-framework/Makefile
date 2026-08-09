@@ -258,6 +258,18 @@ exascale_deploy_peoplesoft:
 	gcloud compute ssh --zone "$$psft_gce_zone" "oracle-exascale-peoplesoft-app" --tunnel-through-iap --project $(PROJECT_ID) \
 	  --quiet --ssh-flag="-o LogLevel=ERROR" --command "sudo chown -Rfv root:root /scripts && sudo chmod -Rfv 777 /scripts/*" 2>/dev/null; \
 	echo ""; \
-	echo "\033[1m>>> Deploying Oracle PeopleSoft on ExaScale @GCP \033[0m"; \
+	echo "\033[1m>>> Setting up nfs share @GCP \033[0m"; \
 	gcloud compute ssh --zone "$$psft_gce_zone" "oracle-exascale-peoplesoft-app" --tunnel-through-iap --project $(PROJECT_ID) \
-	  --quiet --ssh-flag="-o LogLevel=ERROR" --command "sudo -u oracle bash -c '/scripts/gcp_to_exa_db_sync.sh | tee -a /scripts/gcp_to_exa_db_sync.sh.log'" 2>/dev/null
+	  --quiet --ssh-flag="-o LogLevel=ERROR" --command "sudo bash -c '/scripts/setup_nfs_share.sh'" 2>/dev/null \
+	echo ""; \
+	echo "\033[1m>>> Staging Customer data @GCP \033[0m"; \
+	gcloud compute ssh --zone "$$psft_gce_zone" "oracle-exascale-peoplesoft-app" --tunnel-through-iap --project $(PROJECT_ID) \
+	  --quiet --ssh-flag="-o LogLevel=ERROR" --command "sudo -u oracle bash -c '/scripts/stage_customer_data.sh'" 2>/dev/null \
+	echo ""; \
+	echo "\033[1m>>> Setting up Peoplesoft database on Exascale@GCP \033[0m"; \
+	gcloud compute ssh --zone "$$psft_gce_zone" "oracle-exascale-peoplesoft-app" --tunnel-through-iap --project $(PROJECT_ID) \
+	  --quiet --ssh-flag="-o LogLevel=ERROR" --command "sudo -u oracle bash -c '/scripts/start_db_setup.sh'" 2>/dev/null \
+	echo ""; \
+	echo "\033[1m>>> Setting up Peoplesoft applications @GCP \033[0m"; \
+	gcloud compute ssh --zone "$$psft_gce_zone" "oracle-exascale-peoplesoft-app" --tunnel-through-iap --project $(PROJECT_ID) \
+	  --quiet --ssh-flag="-o LogLevel=ERROR" --command "sudo -u oracle bash -c '/scripts/setup_ps_apps.sh'" 2>/dev/null

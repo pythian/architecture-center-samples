@@ -466,6 +466,7 @@ node_ip: "$NODE_IP"
 admin_password: "${self.triggers.password}"
 connection_strings: $TNS_DATA
 EOF
+      cp ./exascale_outputs.yaml /tmp/exascale_outputs.yaml
 
       max_retries=10
       retry_count=0
@@ -488,6 +489,6 @@ EOF
 
   provisioner "local-exec" {
     when    = destroy
-    command = "rm -f ./exascale_outputs.yaml"
+    command = "rm -f ./exascale_outputs.yaml /tmp/exascale_outputs.yaml"
   }
 }

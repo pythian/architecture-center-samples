@@ -86,7 +86,7 @@ module "firewall_rules" {
       allow = [
         {
           protocol = "tcp"
-          ports    = ["8000", "4443"]
+          ports    = ["8000", "4443", "2049"]
         }
       ]
       log_config = {
