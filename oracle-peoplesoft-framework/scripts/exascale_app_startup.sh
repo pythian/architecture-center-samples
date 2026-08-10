@@ -65,7 +65,7 @@ ln -s /usr/lib/libXm.so.4.0.4 /usr/lib/libXm.so.2
 if [[ $(grep which /home/oracle/.bash_profile | wc -l) -eq 0 ]]; then echo "unset which" >> /home/oracle/.bash_profile ; fi
 
 # function to source env on 
-if [[ $(grep funct.sh /home/oracle/.bash_profile | wc -l) -eq 0 ]]; then echo "source /scripts/funct.sh" >> /home/oracle/.bash_profile ; fi
+# if [[ $(grep funct.sh /home/oracle/.bash_profile | wc -l) -eq 0 ]]; then echo "source /scripts/funct.sh" >> /home/oracle/.bash_profile ; fi
 
 # swap | 20g
 fallocate -l 20G /swapfile

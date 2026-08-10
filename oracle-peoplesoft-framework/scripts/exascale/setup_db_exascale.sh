@@ -225,7 +225,7 @@ EOF
 DTS="${PDBNAME}_$(date +%Y%m%d_%H%M%S)"
 sqlplus -s / as sysdba <<EOF
 alter session set container=$PDBNAME;
-administer key management create encryption key using tag '$DTS' force keystore identified by $EXA_PASS with backup;
+administer key management create encryption key using tag '$DTS' force keystore identified by "$EXA_PASS" with backup;
 EOF
 
 KEYNAME=$(sqlplus -s / as sysdba <<EOF
@@ -239,7 +239,7 @@ EOF
 	
 sqlplus -s / as sysdba <<EOF
 alter session set container=$PDBNAME;
-administer key management use encryption key '$KEYNAME' force keystore identified by $EXA_PASS with backup;
+administer key management use encryption key '$KEYNAME' force keystore identified by "$EXA_PASS" with backup;
 @/scripts/enc_tbs.sql;
 @/scripts/tmp_recreate.sql;
 EOF

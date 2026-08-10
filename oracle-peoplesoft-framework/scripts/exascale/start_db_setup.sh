@@ -52,4 +52,4 @@ start_db_setup() {
 }
 
 # Main
-setup_nfs_sharing;
+start_db_setup;

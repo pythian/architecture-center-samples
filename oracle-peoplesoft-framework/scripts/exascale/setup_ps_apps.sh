@@ -44,7 +44,7 @@ print_summary_cust(){
 
           hosts file entry   : 127.0.0.1 $(hostname -f) $(hostname)
           IAP tunneling      : 
-          	gcloud compute ssh $(hostname) --tunnel-through-iap --project $(gcloud config get-value project) -- -L 8001:localhost:8001
+          	gcloud compute ssh oracle-exascale-peoplesoft-app --tunnel-through-iap --project $(gcloud config get-value project) -- -L 8001:localhost:8001
          -----------------------------------------
     \033[0m"    
 }
@@ -325,8 +325,6 @@ psadmin -p start -d ${PRCSD};
         job="@reboot /scripts/peoplesoft_cust_start.sh | tee -a /scripts/logs/peoplesoft_cust_start.sh 2>&1"
         ( crontab -l 2>/dev/null; echo "$job" ) | crontab -
     fi
-    
-    print_summary_cust
 	
     ### EOF actual function betweens these comments
     echo -e "\nlog: $logfile"
@@ -336,7 +334,7 @@ psadmin -p start -d ${PRCSD};
 
 
 # Main
-rdbms_stage_oh;
+# rdbms_stage_oh;
 setup_tnsnames;
 setup_cust_app;
 print_summary_cust;

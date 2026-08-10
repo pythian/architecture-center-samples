@@ -37,6 +37,24 @@ function_example() {
  } 2>&1 | tee -a ${logfile}
 }
 
+is_root_user() {
+    if [ "$(id -u)" -eq 0 ]; then
+        return 0  # true, user is root
+    else
+        echo "User is not root"
+        return 1  # false, user is not root
+    fi
+}
+
+is_oracle_user() {
+    if [ "$(id -un)" = "oracle" ]; then
+        return 0  # true, user is oracle
+    else
+        echo "User is not oracle"
+        return 1  # false, user is not oracle
+    fi
+}
+
 stage_cust_data() {
  logfile=${log_path}/$(date +%Y%m%d_%H%M%S)_${FUNCNAME[0]}.log
  {

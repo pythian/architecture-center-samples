@@ -35,12 +35,19 @@ setup_nfs_sharing() {
     ### actual function betweens these comments
     print_task "Setting up hostname for apps node"
     hostnamectl set-hostname apps.example.com
-    echo "$(hostname -i)     apps.example.com apps" >> /etc/hosts
+    if ! grep -q "apps.example.com" /etc/hosts; then
+        echo "$(hostname -i)     apps.example.com apps" >> /etc/hosts
+    fi
 
     print_task "Setting up /etc/exports for NFS sharing"
     
     export EXA_IP=$(sed -n 's/^[[:space:]]*node_ip:[[:space:]]*"\([^"]*\)".*/\1/p' /tmp/exascale_outputs.yaml)
-    echo "/u01  ${EXA_IP}(rw,async,insecure,no_subtree_check,fsid=241,no_root_squash)" >> /etc/exports
+    export P_KEY=/home/oracle/.ssh/exadb_private_key.pem
+    export SSH_CMD="ssh -o StrictHostKeychecking=no"
+    
+    if ! grep -q '^/u01\b' /etc/exports; then
+        echo "/u01  ${EXA_IP}(rw,async,insecure,no_subtree_check,fsid=241,no_root_squash)" >> /etc/exports
+    fi
     
     print_task "Contents of /etc/exports for NFS sharing"
     cat /etc/exports
@@ -50,9 +57,6 @@ setup_nfs_sharing() {
     systemctl stop nfs-server
     systemctl start nfs-server
     exportfs -ra
-
-    export P_KEY=/home/oracle/.ssh/exadb_private_key.pem
-    export SSH_CMD="ssh -o StrictHostKeychecking=no"
     
     print_task "Testing SSH connection to Exascale Server: ${EXA_IP}"
 
@@ -62,7 +66,7 @@ setup_nfs_sharing() {
 
     print_task "Mounting /buckets on Exascale Vm: ${EXA_IP}"
 
-    ${SSH_CMD} -i ${P_KEY} opc@${EXA_IP} "sudo mount -t nfs -o rsize=1048576,actimeo=3600,nconnect=8,noatime,nodiratime ${APPS_IP}:/u01 /buckets"
+    ${SSH_CMD} -i ${P_KEY} opc@${EXA_IP} "sudo mkdir -v /buckets; sudo mount -t nfs -o rsize=1048576,actimeo=3600,nconnect=8,noatime,nodiratime ${APPS_IP}:/u01 /buckets;  sudo ls -l /buckets/"
 
     print_task "Status of /buckets on Exascale Vm: ${EXA_IP}"
     ${SSH_CMD} -i ${P_KEY} opc@${EXA_IP} 'df -hP | grep /buckets'
