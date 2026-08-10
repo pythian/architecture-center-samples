@@ -1,16 +1,14 @@
-<<<<<<< HEAD
 # Oracle PeopleSoft Toolkit on GCP | Oracle PeopleSoft (Customer data) on ExaScale @GCP
 
 ## Purpose
 
 This artifact provides a fully automated framework to deploy a single-node **Oracle PeopleSoft Customer** environment onto a clean Google Cloud Platform (GCP) project and **Oracle Exascale@GCP**. Utilizing Terraform for infrastructure-as-code and automated staging/installation scripts, this toolkit eliminates the manual complexity typically associated with provisioning Oracle PeopleSoft. 
-=======
+
 # Oracle PeopleSoft Toolkit on GCP | Oracle PeopleSoft (Customer data)
 
 ## Purpose
 
 This artifact provides a fully automated framework to deploy a single-node **Oracle PeopleSoft Customer** environment onto a clean Google Cloud Platform (GCP) project and Oracle Exascale@GCP. Utilizing Terraform for infrastructure-as-code and automated staging/installation scripts, this toolkit eliminates the manual complexity typically associated with provisioning Oracle PeopleSoft. 
->>>>>>> 2a9da3297c5f2bb5e3b072d9c6df20216c34ded1
 
 The primary goals of this repository are to:
 * **Accelerate Evaluation:** Enable enterprise architects, administrators, and business users to rapidly stand up an operational Oracle PeopleSoft instance to evaluate its functionality, workflow engine, and user experience on GCP.
@@ -22,12 +20,7 @@ The primary goals of this repository are to:
 ## Architectural Diagram
 
 ### Oracle PeopleSoft on GCP
-<<<<<<< HEAD
 ![Oracle PeopleSoft on GCP Technical Architecture Diagram](images/plpsft_diag_cust_data_exa.png "Oracle PeopleSoft Customer Data on Exascale @GCP Technical Architecture Diagram")
-=======
-![Oracle PeopleSoft on GCP Technical Architecture Diagram](images/plpsft_diag_cust_data.png "Oracle PeopleSoft Customer Data on GCP Technical Architecture Diagram")
->>>>>>> 2a9da3297c5f2bb5e3b072d9c6df20216c34ded1
-
 
 ## Prerequisites
 
@@ -37,12 +30,9 @@ Before starting, ensure the following requirements are met:
 - GCP Project: A Google Cloud project must already exist for this deployment. Note the `PROJECT_ID`.
 - Make: Install the `make` tool (version >= 4.3 recommended).
 - GCLOUD CLI
-<<<<<<< HEAD
 - Subscribe to Oracle Database@Google Cloud
 - Connect GCP Project with Oracle OCI account
 - Create an Oracle SR to increase Exascale DB Storage Vault quota to at least 1T
-=======
->>>>>>> 2a9da3297c5f2bb5e3b072d9c6df20216c34ded1
 
 ### Quota Requirements
 Before deploying Toolkit, verify that your GCP project has sufficient resource quotas in the target region.
@@ -78,12 +68,9 @@ Ensure your GCP account has the following IAM roles:
 - **Storage access (choose one):**  
   - `roles/storage.admin` – Full control of Cloud Storage (buckets and objects), **or**  
   - `roles/storage.objectAdmin` – Object-level control only (least privilege option) 
-<<<<<<< HEAD
 - **Oracle @GCP:**  
   - `roles/oracledatabase.exadbVmClusterAdmin` – Oracle Database@Google Cloud Exadata Database Service on Exascale Infrastructure VM Cluster Admin 
   - `roles/oracledatabase.exascaleDbStorageVaultAdmin` – Oracle Database@Google Cloud Exadata Database Service on Exascale Infrastructure Storage Vault Admin
-=======
->>>>>>> 2a9da3297c5f2bb5e3b072d9c6df20216c34ded1
 
 #### Alternatively, the GCP account can have broad roles like:
 - `roles/owner`
@@ -130,21 +117,13 @@ make init
 # IMPORTANT: Verify the disk type and disk sizes in the infra.auto.tfvars file
 
 # Plan the changes
-<<<<<<< HEAD
 make exascale_plan
 
 # Deploy the changes
 # This process will take ~ 2 hours to provision and ExaScale cluster
 make exascale_deploy
-=======
-make plan
-
-# Deploy the changes
-make deploy
->>>>>>> 2a9da3297c5f2bb5e3b072d9c6df20216c34ded1
 ```
 
----
 #### 3.1 Prepare Oracle PeopleSoft database to be packed for GCP
 
 Pack the RDBMS Oracle home and Oracle RMAN backup as shown below:
@@ -246,11 +225,8 @@ gcloud storage cp -r ${BACKUP_DIR}/RMAN_TO_GCP/* ${GCP_BUCKET}
 ```
 
 ### 4. Deploy Oracle PeopleSoft environment
-<<<<<<< HEAD
 This process will do RMAN restore database - it's purely related on size of the database
-=======
 This process lasts ~90-120 minutes
->>>>>>> 2a9da3297c5f2bb5e3b072d9c6df20216c34ded1
 
 ```bash
 # Deploy changes
