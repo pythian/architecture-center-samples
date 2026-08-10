@@ -313,6 +313,10 @@ setup_cust_app() {
     print_task "Creating cron autostart"
 echo "
 source /u02/app/psft.env 
+cd /u02/app/newcfg/webserv/peoplesoft/bin
+WEB_DOM=$(grep "DOMAIN_NAME=" setEnv.sh | awk -F= '{ print $2 }')
+APPD=$( grep APP_DOMAIN_NAME /u01/app/domaininfo.txt | awk -F= '{ print $2 }')
+PRCSD=$( grep PRCS_DOMAIN_NAME  /u01/app/domaininfo.txt | awk -F= '{ print $2 }')
 psadmin -w start -d ${WEB_DOM};
 psadmin -c start -d ${APPD};
 psadmin -p start -d ${PRCSD};
@@ -322,7 +326,7 @@ psadmin -p start -d ${PRCSD};
 
     # add reboot script to cron
     if [ $(crontab -l 2>/dev/null | grep peoplesoft_cust_start | wc -l) -eq 0 ]; then
-        job="@reboot /scripts/peoplesoft_cust_start.sh | tee -a /scripts/logs/peoplesoft_cust_start.sh 2>&1"
+        job="@reboot /scripts/peoplesoft_cust_start.sh | tee -a /scripts/logs/peoplesoft_cust_start.sh.log 2>&1"
         ( crontab -l 2>/dev/null; echo "$job" ) | crontab -
     fi
 	

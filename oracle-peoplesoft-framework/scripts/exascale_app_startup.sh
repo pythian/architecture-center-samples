@@ -122,4 +122,17 @@ if [ -n "$EXA_KEY" ]; then
     done
 fi
 
+# change hostname
+hostnamectl set-hostname apps.example.com
+if ! grep -q "apps.example.com" /etc/hosts; then
+    echo "$(hostname -i)     apps.example.com apps" >> /etc/hosts
+fi
+
+echo "Checking crontab for hostname on startup"
+if ! crontab -l 2>/dev/null | grep -q 'hostnamectl set-hostname apps.example.com'; then
+    echo "Add crontab: startup hostname set"
+    job='@reboot /usr/bin/hostnamectl set-hostname apps.example.com'
+    (crontab -l 2>/dev/null; echo "$job") | crontab -
+fi
+
 echo "EBS Startup Script Complete!"
