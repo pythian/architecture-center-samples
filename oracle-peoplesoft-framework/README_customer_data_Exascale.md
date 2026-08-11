@@ -2,12 +2,6 @@
 
 ## Purpose
 
-This artifact provides a fully automated framework to deploy a single-node **Oracle PeopleSoft Customer** environment onto a clean Google Cloud Platform (GCP) project and **Oracle Exascale@GCP**. Utilizing Terraform for infrastructure-as-code and automated staging/installation scripts, this toolkit eliminates the manual complexity typically associated with provisioning Oracle PeopleSoft. 
-
-# Oracle PeopleSoft Toolkit on GCP | Oracle PeopleSoft (Customer data)
-
-## Purpose
-
 This artifact provides a fully automated framework to deploy a single-node **Oracle PeopleSoft Customer** environment onto a clean Google Cloud Platform (GCP) project and Oracle Exascale@GCP. Utilizing Terraform for infrastructure-as-code and automated staging/installation scripts, this toolkit eliminates the manual complexity typically associated with provisioning Oracle PeopleSoft. 
 
 The primary goals of this repository are to:
