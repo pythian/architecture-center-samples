@@ -129,9 +129,9 @@ if ! grep -q "apps.example.com" /etc/hosts; then
 fi
 
 echo "Checking crontab for hostname on startup"
-if ! crontab -l 2>/dev/null | grep -q 'hostnamectl set-hostname apps.example.com'; then
+if ! crontab -l 2>/dev/null | grep -q 'hostnamectl'; then
     echo "Add crontab: startup hostname set"
-    job='@reboot /usr/bin/hostnamectl set-hostname apps.example.com'
+    job='@reboot sleep 5 && hostnamectl set-hostname apps.example.com'
     (crontab -l 2>/dev/null; echo "$job") | crontab -
 fi
 

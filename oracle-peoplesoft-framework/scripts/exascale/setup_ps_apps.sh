@@ -312,6 +312,7 @@ setup_cust_app() {
 
     print_task "Creating cron autostart"
 echo "
+sleep 10
 source /u02/app/psft.env 
 cd /u02/app/newcfg/webserv/peoplesoft/bin
 WEB_DOM=$(grep "DOMAIN_NAME=" setEnv.sh | awk -F= '{ print $2 }')
@@ -338,7 +339,7 @@ psadmin -p start -d ${PRCSD};
 
 
 # Main
-# rdbms_stage_oh;
+rdbms_stage_oh;
 setup_tnsnames;
 setup_cust_app;
 print_summary_cust;
