@@ -5,7 +5,7 @@ output "exascale_peoplesoft_instance_zone" {
 
 output "exascale_deployment_summary" {
   description = "Summary of the Oracle PeopleSoft on ExaScale deployment."
-  value       = <<-EOT
+  value       = !var.oracle_peoplesoft_exascale ? "Not in ExaScale mode - see 'deployment_summary'." : <<-EOT
 
 =========================================
  Oracle PeopleSoft on ExaScale @ GCP
