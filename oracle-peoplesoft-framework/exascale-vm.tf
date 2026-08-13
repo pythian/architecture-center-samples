@@ -5,7 +5,7 @@ locals {
     "http-server",
     "https-server",
     "lb-health-check",
-    "oracle-peoplesoft-apps",
+    "oracle-exascale-peoplesoft-app",
     "iap-access",
     "icmp-access",
     "egress-nat",

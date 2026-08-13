@@ -241,7 +241,7 @@ exascale_destroy:
 exascale_deploy_peoplesoft:
 	@echo "" ; \
 	echo "\033[1m>>> Getting ExaScale app instance zone from Terraform output \033[0m"; \
-	psft_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw exascale_peoplesoft_instance_zone); \
+	psft_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw apps_instance_zone); \
 	echo "Zone: $$psft_gce_zone"; \
 	export CLOUDSDK_CORE_LOG_HTTP=false ; \
 	export CLOUDSDK_PYTHON_SITEPACKAGES=1 ; \
