@@ -20,6 +20,7 @@ The primary goals of this repository are to:
 ### Oracle PeopleSoft on GCP
 ![Oracle PeopleSoft on GCP Technical Architecture Diagram](images/plpsft_diag.png "Oracle PeopleSoft Demo on GCP Technical Architecture Diagram")
 
+
 ## Prerequisites
 
 Before starting, ensure the following requirements are met:
