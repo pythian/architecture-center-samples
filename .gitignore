@@ -20,6 +20,7 @@ terraform.tfstate*
 
 # Ignore generated grid and exascale files
 .grid_image_id
+.grid_version
 exascale_outputs.*
 
 # Ignore key files
@@ -27,7 +28,6 @@ exascale_outputs.*
 *.pub
 
 # ExaScale secrets & generated files 
-.grid_image_id
 exadb_private_key.pem
 exadb_public_key.pub
 exascale_outputs.yaml
