@@ -217,7 +217,7 @@ sqlplus -s / as sysdba <<EOF
 alter session set container=${PDBNAME};
 set heading off feedback off verify off pages 0 lines 200;
 spool /scripts/enc_tbs.sql;
-SELECT 'ALTER TABLESPACE ' || tablespace_name || ' ENCRYPTION ONLINE USING ''AES128'' ENCRYPT;' FROM dba_tablespaces WHERE (contents = 'PERMANENT' or contents = 'UNDO') ORDER BY tablespace_name;
+SELECT 'ALTER TABLESPACE ' || tablespace_name || ' ENCRYPTION ONLINE USING ''AES128'' ENCRYPT;' FROM dba_tablespaces WHERE (contents = 'PERMANENT' or contents = 'UNDO') AND tablespace_name NOT IN ('SYSTEM', 'SYSAUX') ORDER BY tablespace_name;
 EOF
 
     print_task "Setup encryption keys in ${PDBNAME}"
