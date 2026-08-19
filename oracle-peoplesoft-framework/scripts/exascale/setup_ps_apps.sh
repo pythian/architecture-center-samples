@@ -189,7 +189,7 @@ EOF
     print_task "Setting up tnsnames.ora for Peoplesoft apps tier..."
     cd /u02/db
     export PDBTNS=$(echo $EXATNS | sed "s/\(SERVICE_NAME=\)[^)]*/\1${SVCNAME}/")
-    echo "$PDBNAME=\"$PDBTNS\"" > tnsnames.ora
+	echo "$PDBNAME = $PDBTNS" > tnsnames.ora
     echo "tnsnames.ora for Peoplesoft apps tier is: "
     cat tnsnames.ora
     ### EOF actual function betweens these comments
