@@ -62,7 +62,7 @@ setup_nfs_sharing() {
 
     ${SSH_CMD} -i ${P_KEY} opc@${EXA_IP} 'echo "SSH connection to Exascale Server is working"'
 
-    export APPS_IP=$(hostname -i)
+        export APPS_IP=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip)
 
     print_task "Mounting /buckets on Exascale Vm: ${EXA_IP}"
 
