@@ -275,6 +275,7 @@ setup_cust_app() {
 	
     WEB_DOM=$(grep "DOMAIN_NAME=" setEnv.sh | awk -F= '{ print $2 }')
 	HOST_D=$(hostname -d)
+	HOST_D=${HOST_D:-example.com}
 	
 	print_task "Configuring domain name for $WEB_DOM to $HOST_D"
 	
