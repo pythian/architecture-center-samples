@@ -73,7 +73,7 @@ rdbms_setup_aux() {
 	
     print_task "Dropping existing PDB ${EXA_PDB_NAME}:"
 	print_task "Running command: 	dbaascli pdb delete --dbName ${EXA_DB_NAME} --pdbName ${EXA_PDB_NAME}"
-    dbaascli pdb delete --dbName ${EXA_DB_NAME} --pdbName ${EXA_PDB_NAME}
+    dbaascli pdb delete --dbName ${EXA_DB_NAME} --pdbName ${EXA_PDB_NAME} || true
 
 	# Setup Aux instance
     print_task "Setting up Aux instance on Exascale vm"
