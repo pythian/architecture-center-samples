@@ -103,6 +103,7 @@ echo "
 	print_task "Startup nomount ${AUX_ORACLE_SID}"
 	
 sqlplus / as sysdba <<EOF
+whenever sqlerror exit failure
 startup nomount pfile='/scripts/initaux.ora';
 EOF
 
