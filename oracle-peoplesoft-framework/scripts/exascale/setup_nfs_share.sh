@@ -42,6 +42,10 @@ setup_nfs_sharing() {
     print_task "Setting up /etc/exports for NFS sharing"
     
     export EXA_IP=$(sed -n 's/^[[:space:]]*node_ip:[[:space:]]*"\([^"]*\)".*/\1/p' /tmp/exascale_outputs.yaml)
+    if [ -z "$EXA_IP" ]; then
+        echo "Error: EXA_IP could not be determined from /tmp/exascale_outputs.yaml"
+        exit 1
+    fi
     export P_KEY=/home/oracle/.ssh/exadb_private_key.pem
     export SSH_CMD="ssh -o StrictHostKeychecking=no"
     
