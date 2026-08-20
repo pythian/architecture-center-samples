@@ -86,7 +86,10 @@ chmod 700 /home/oracle/.ssh
 
 SECRET_ID=$(curl -s -f -H "Metadata-Flavor: Google" "http://metadata.google.internal/computeMetadata/v1/instance/attributes/exadb_private_key_secret_id" || true)
 
-SECRET_NAME=$(basename "$SECRET_ID")
+SECRET_NAME=""
+if [ -n "$SECRET_ID" ]; then
+    SECRET_NAME=$(basename "$SECRET_ID")
+fi
 
 EXA_KEY=""
 if [ -n "$SECRET_NAME" ]; then
