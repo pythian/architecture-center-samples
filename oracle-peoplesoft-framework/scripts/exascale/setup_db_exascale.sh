@@ -10,8 +10,9 @@ if [ -z "$BUCKET" ]; then BUCKET=$(gcloud storage ls | grep oracle-peoplesoft-to
 local_media=/buckets
 
 # Exa info
-export EXA_PROFILE=/home/oracle/PSFTCDB.env
-export EXA_DB_NAME=PSFTCDB
+export EXA_DB_NAME=$(sed -n 's/^[[:space:]]*cdb_name:[[:space:]]*"\([^"]*\)".*/\1/p' /tmp/exascale_outputs.yaml)
+export EXA_DB_NAME=${EXA_DB_NAME:-PSFTCDB}
+export EXA_PROFILE="/home/oracle/${EXA_DB_NAME}.env"
 export EXA_PDB_NAME=PDB1
 export EXA_PASS=$(sed -n 's/^[[:space:]]*admin_password:[[:space:]]*"\([^"]*\)".*/\1/p' /tmp/exascale_outputs.yaml)
 
