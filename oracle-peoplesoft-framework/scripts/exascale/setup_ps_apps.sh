@@ -78,8 +78,8 @@ rdbms_stage_oh() {
 
     time tar -xzf ${local_media}/app/RDBMS_TO_GCP.tar.gz -C $(dirname "$ORACLE_HOME")
 
-    # move files
-    mv $(dirname "$ORACLE_HOME")/$(basename "$OLD_OH")/{.,}* $ORACLE_HOME/
+    # move files including hidden files safely
+    (shopt -s dotglob; mv $(dirname "$ORACLE_HOME")/$(basename "$OLD_OH")/* $ORACLE_HOME/)
     rmdir -v $(dirname "$ORACLE_HOME")/$(basename "$OLD_OH")
 
     ls -ld $ORACLE_HOME
