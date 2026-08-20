@@ -217,7 +217,9 @@ setup_cust_app() {
     print_task "Setting up Peoplesoft applications..."
 	print_task "Setting up Environment file.."
 	mkdir -p /u02/app
-	cp -fv ${local_media}/app/psft.env /u02/app
+	# Strip carriage returns to prevent issues if files were uploaded from Windows
+	tr -d '\r' < ${local_media}/app/psft.env > /u02/app/psft.env
+	tr -d '\r' < ${local_media}/app/domaininfo.txt > /tmp/domaininfo.txt && mv /tmp/domaininfo.txt ${local_media}/app/domaininfo.txt
 	cd /u02/app
 	sed -i 's|export TNS_ADMIN=.*$|export TNS_ADMIN=/u02/db|' psft.env
 	sed -i 's|export ORACLE_HOME=.*$|export ORACLE_HOME=/u02/db/oracle-server/19.3.0.0|' psft.env 
