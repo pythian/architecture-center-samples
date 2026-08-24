@@ -375,7 +375,10 @@ EOF
       DB_NAME_CLEAN=$(echo "$CDB_NAME_RAW" | sed 's/[-_]//g')
 
       DB_LIST=$(oci raw-request --http-method GET --target-uri "https://database.$${OCI_REGION}.oraclecloud.com/${self.triggers.oci_api_version}/databases?systemId=$CLUSTER_OCID" 2>/dev/null || true)
-      DB_OCID=$(echo "$DB_LIST" | jq -r --arg dbname "$DB_NAME_CLEAN" '.data[] | select((.dbName | ascii_downcase) == ($dbname | ascii_downcase)) | .id' | head -1)
+      DB_OCID=""
+      if [ -n "$DB_LIST" ]; then
+        DB_OCID=$(echo "$DB_LIST" | jq -r --arg dbname "$DB_NAME_CLEAN" '.data[] | select((.dbName | ascii_downcase) == ($dbname | ascii_downcase)) | .id' | head -1)
+      fi
 
       if [ -n "$DB_OCID" ] && [ "$DB_OCID" != "null" ]; then
         oci raw-request --http-method DELETE --target-uri "https://database.$${OCI_REGION}.oraclecloud.com/${self.triggers.oci_api_version}/databases/$DB_OCID" 2>/dev/null || true
@@ -386,7 +389,10 @@ EOF
       API_URL="https://database.$${OCI_REGION}.oraclecloud.com/${self.triggers.oci_api_version}/dbHomes"
       LIST_URL="$API_URL?vmClusterId=$CLUSTER_OCID&displayName=$DISPLAY_NAME"
       LIST_RESULT=$(oci raw-request --http-method GET --target-uri "$LIST_URL" 2>/dev/null || true)
-      DB_HOME_OCID=$(echo "$LIST_RESULT" | jq -r --arg dname "$DISPLAY_NAME" '.data[] | select(.displayName == $dname) | .id' | head -1)
+      DB_HOME_OCID=""
+      if [ -n "$LIST_RESULT" ]; then
+        DB_HOME_OCID=$(echo "$LIST_RESULT" | jq -r --arg dname "$DISPLAY_NAME" '.data[] | select(.displayName == $dname) | .id' | head -1)
+      fi
 
       if [ -n "$DB_HOME_OCID" ] && [ "$DB_HOME_OCID" != "null" ]; then
         oci raw-request --http-method DELETE --target-uri "https://database.$${OCI_REGION}.oraclecloud.com/${self.triggers.oci_api_version}/dbHomes/$DB_HOME_OCID" 2>/dev/null || true
@@ -464,6 +470,7 @@ cluster_name: "$CLUSTER_NAME"
 scan_dns: "$SCAN_DNS"
 node_ip: "$NODE_IP"
 admin_password: "${self.triggers.password}"
+cdb_name: "${self.triggers.cdb_name}"
 connection_strings: $TNS_DATA
 EOF
       cp ./exascale_outputs.yaml /tmp/exascale_outputs.yaml

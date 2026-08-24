@@ -86,7 +86,7 @@ module "firewall_rules" {
       allow = [
         {
           protocol = "tcp"
-          ports    = ["8000", "4443", "2049"]
+          ports    = ["8000", "4443"]
         }
       ]
       log_config = {
@@ -108,6 +108,25 @@ module "firewall_rules" {
         metadata = "INCLUDE_ALL_METADATA"
       }
       target_tags = ["external-db-access"]
+    },
+    {
+      name        = "ps-allow-nfs-internal"
+      description = "Allow NFS (2049) only from internal VPC and ODB network CIDRs"
+      source_ranges = [
+        values(module.network.subnets)[0].ip_cidr_range,
+        var.exascale_client_subnet_cidr,
+        var.exascale_backup_subnet_cidr,
+      ]
+      allow = [
+        {
+          protocol = "tcp"
+          ports    = ["2049"]
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      target_tags = ["external-app-access"]
     }
   ]
 
