@@ -4,7 +4,6 @@ set -e
 ## initialization and variables
 log_path=/scripts/logs
 if [ ! -d "$log_path" ]; then  mkdir -p "$log_path"; fi
-if [ -z "$BUCKET" ]; then BUCKET=$(gcloud storage ls | grep oracle-peoplesoft-toolkit-storage-bucket); fi
 
 # paths
 local_media=/buckets

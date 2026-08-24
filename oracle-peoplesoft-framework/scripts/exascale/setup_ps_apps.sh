@@ -240,7 +240,7 @@ setup_cust_app() {
     
 	print_task "Replicating configuration home..."
 	
-	source /u02/app/psft.env
+	source /u02/app/psft.env || true
 	export PS_CFG_HOME=/u02/app/newcfg
 	which psadmin
 	psadmin -replicate -ch /u02/app/oldcfg -r
@@ -273,7 +273,7 @@ setup_cust_app() {
 	
 	grep "ADMINSERVER_HOSTNAME=" setEnv.sh
 	grep "PIA_HOME=" setEnv.sh	
-    source /u02/app/psft.env 
+    source /u02/app/psft.env || true
 	
     WEB_DOM=$(grep "DOMAIN_NAME=" setEnv.sh | awk -F= '{ print $2 }')
 	HOST_D=$(hostname -d)
@@ -317,7 +317,7 @@ setup_cust_app() {
     print_task "Creating cron autostart"
 echo "
 sleep 10
-source /u02/app/psft.env 
+source /u02/app/psft.env || true
 cd /u02/app/newcfg/webserv/peoplesoft/bin
 WEB_DOM=$(grep "DOMAIN_NAME=" setEnv.sh | awk -F= '{ print $2 }')
 APPD=$( grep APP_DOMAIN_NAME /u01/app/domaininfo.txt | awk -F= '{ print $2 }')
