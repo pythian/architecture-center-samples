@@ -6,36 +6,6 @@ module "firewall_rules" {
 
   ingress_rules = [
     {
-      name          = "ps-allow-http-in"
-      description   = "Allow HTTP traffic inbound"
-      source_ranges = var.trusted_ip_ranges
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["80"]
-        }
-      ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      target_tags = ["http-server"]
-    },
-    {
-      name          = "ps-allow-https-in"
-      description   = "Allow HTTPS traffic inbound"
-      source_ranges = var.trusted_ip_ranges
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["443"]
-        }
-      ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      target_tags = ["https-server"]
-    },
-    {
       name        = "ps-allow-icmp-in"
       description = "Allow ICMP traffic inbound"
       source_ranges = [
@@ -67,7 +37,7 @@ module "firewall_rules" {
     },
     {
       name          = "ps-allow-internal-access"
-      description   = "Allow internal HTTP traffic within the VPC"
+      description   = "Allow internal traffic within the VPC"
       source_ranges = [values(module.network.subnets)[0].ip_cidr_range]
       allow = [
         {
@@ -78,36 +48,6 @@ module "firewall_rules" {
         metadata = "INCLUDE_ALL_METADATA"
       }
       target_tags = ["internal-access"]
-    },
-    {
-      name          = "ps-allow-external-app-access"
-      description   = "Allow external access to Oracle PeopleSoft Apps"
-      source_ranges = var.trusted_ip_ranges
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["8000", "4443"]
-        }
-      ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      target_tags = ["external-app-access"]
-    },
-    {
-      name          = "ps-allow-external-db-access"
-      description   = "Allow external access to Oracle PeopleSoft DB"
-      source_ranges = var.trusted_ip_ranges
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["1521"]
-        }
-      ]
-      log_config = {
-        metadata = "INCLUDE_ALL_METADATA"
-      }
-      target_tags = ["external-db-access"]
     },
     {
       name        = "ps-allow-nfs-internal"
