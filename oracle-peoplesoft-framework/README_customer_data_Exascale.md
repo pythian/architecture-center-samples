@@ -244,7 +244,7 @@ Open IAP tunnel
 ```bash
 # open tunnel
 gcloud compute ssh "oracle-peoplesoft-apps" --tunnel-through-iap  \
- --project "oracle-ebs-toolkit" -- -L 8001:localhost:8001
+ --project "<PROJECT_ID>" -- -L 8001:localhost:8001
 
 ```
 
