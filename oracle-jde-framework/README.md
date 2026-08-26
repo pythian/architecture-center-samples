@@ -1,15 +1,12 @@
-# Oracle EBS Toolkit on GCP | Oracle EBS Vision
+# Oracle JD Edwards EnterpriseOne Toolkit on GCP | JD Edwards Demo 
 
-This folder provides Terraform configurations and Makefile automation to deploy Oracle EBS infrastructure on Google Cloud Platform.
+This folder provides Terraform configurations and Makefile automation to deploy Oracle JD Edwards EnterpriseOne infrastructure on Google Cloud Platform.
 
 
 ## Architectural Diagram
 
-### Oracle Vision on GCP
-![Oracle Vision on GCP Technical Architecture Diagram](images/Oracle%20Vision%20on%20GCP_%20Technical%20Architecture%20diagram.png "Oracle Vision on GCP Technical Architecture Diagram")
-
-### Oracle Customer EBS on GCP
-![Oracle Customer EBS on GCP Technical Architecture Diagram](images/Oracle%20Customer%20EBS%20on%20GCP_%20Technical%20Architecture%20diagram.png "Oracle Customer EBS on GCP Technical Architecture Diagram")
+### Oracle JD Edwards Demo on GCP
+![Oracle JD Edwards Demo Technical Architecture Diagram](images/Oracle%20Vision%20on%20GCP_%20Technical%20Architecture%20diagram.png "Oracle JD Edwards Demo on GCP Technical Architecture Diagram")
 
 ## Prerequisites
 
@@ -23,7 +20,7 @@ Before starting, ensure the following requirements are met:
 Before deploying Toolkit, verify that your GCP project has sufficient resource quotas in the target region.
 
 Minimum recommended quotas:
-- Persistent Disk SSD (GB): ≥ 1TB
+- Persistent Disk SSD (GB): ~ 1T 
 
 Check your current quotas with:
 
@@ -31,8 +28,6 @@ Check your current quotas with:
 gcloud compute regions describe <REGION> --project=<PROJECT_ID> \
   --format="flattened(quotas[].metric,quotas[].limit,quotas[].usage)" | grep SSD
   ```
-
-If the Persistent Disk SSD quota is less than 1 TB, the deployment will fail.
 
 Action if insufficient:
 
@@ -58,10 +53,9 @@ Ensure your GCP account has the following IAM roles:
 
 #### Alternatively, the GCP account can have broad roles like:
 - `roles/owner`
-
 - `roles/editor`
 
-## Oracle EBS Vision Deployment
+## Oracle JD Edwards EnterpriseOne Demo Deployment
 
 All Makefile commands should be run from the project root for all the deployments.
 
@@ -90,9 +84,9 @@ gcloud auth application-default login
 
 ---
 
-### 3. Deploy EBS Vision Infrastructure
+### 3. Deploy Oracle JD Edwards EnterpriseOne Infrastructure
 
-Run the commands below to deploy the Oracle EBS single-node vision environment:
+Run the commands below to deploy the Oracle JD Edwards EnterpriseOne environment that consists of 5 servers:
 
 ```bash
 # Initialize Terraform backend and modules
@@ -101,21 +95,29 @@ make init
 # IMPORTANT: Verify the disk type and disk sizes in the infra.auto.tfvars file
 
 # Plan the changes
-make vision_plan
+make jde_demo_plan
 
 # Deploy the changes
-make vision_deploy
+make jde_demo_deploy
 ```
 
 ---
 
-### 4. Stage Vision Media files
+### 4. Stage Oracle JD Edwards EnterpriseOne required  Media files
 
-1) Login to https://edelivery.oracle.com using your Oracle account
-2) Search for "Oracle VM Virtual Appliance for Oracle E-Business Suite" and download the media (~ 19 V*.zip files)
-3) Copy those Oracle EBS vision media to the GCP bucket created by the steps above 
+To deploy Oracle JD Edwards EnterpriseOne using [One-Click deployment](https://docs.oracle.com/en/applications/jd-edwards/one-click-provisioning/9.2/eoiol/index.html) process 
+you'll need to stage:
+ 
+  - JD Edwards One Click provisioning
+  - Oracle Database 19c Software
+  - Oracle OPatch for 19c Database
+  - Oracle Database CPU Patch #39034528
+  - Oracle Weblogic 14c
+  - Oracle JDK 1.8
+  - Oracle Opatcvh for 14c Weblogic
+  - Oracle Weblogic CPU patch #39796866
+  - ojdbc8.jar, ons.jar, ucp.jar
 
-* NOTE: deploy process will do md5sum, in case of data issues compare README_DISK -> assemble_12212.zip -> md5sumwhenshipped.txt"
 
 ```bash
 # Example
@@ -126,25 +128,25 @@ gcloud storage cp V*.zip gs://oracle-ebs-toolkit-storage-bucket-9e70a5a7/
 
 ---
 
-### 5. Deploy Oracle EBS Vision environment
+### 5. Deploy Oracle JD Edwards EnterpriseOne Demo container
 
 This process lasts ~50-60 minutes
 
 ```bash
 # Deploy changes
-make vision_deploy_oracle_ebs
+make jde_demo_deploy_soft
 ```
 
-Add the following line (127.0.0.1 apps.example.com apps) to the local hosts file:
 
 ```bash
 # Mac hosts file 
 cat /etc/hosts
-    127.0.0.1 apps.example.com apps
+127.0.0.1 jde-demo-prov.c.oracle-ebs-toolkit-demo.internal jde-demo-prov
+127.0.0.1 jde-demo-db.c.oracle-ebs-toolkit-demo.internal jde-demo-db
+127.0.0.1 jde-demo-ent.c.oracle-ebs-toolkit-demo.internal jde-demo-ent
+127.0.0.1 jde-demo-web.c.oracle-ebs-toolkit-demo.internal jde-demo-web
+127.0.0.1 jde-demo-dep.c.oracle-ebs-toolkit-demo.internal jde-demo-dep
 
-# Windows hosts file
-C:\windows\system32\drivers\etc\hosts
-    127.0.0.1 apps.example.com apps
 ```
 
 Open IAP tunnel
@@ -163,27 +165,17 @@ Open a browser and login to http://apps.example.com:8000 using sysadmin/SYSADMIN
 
 ### 6. Available additional commands
 
-After the Oracle EBS Vision environment deployment process few extra functions are available.
-Also server can be stoped/started, and Oracle EBS will autostart/stop along.
-
-```bash
-# Review EBS Vision environment details for troubleshooting deployment
-make vision_ebs_troubleshoot
-
-# Start EBS Vision environment
-make vision_ebs_start
-
-# Stop EBS Vision environment
-make vision_ebs_stop
-```
+List of commands available
 
 ---
 
-### 7. Destroy Vision Media
+### 7. Destroy Oracle JD Edwards EnterpriseOne Demo environment
 
 ```bash
-# Destroy Vision infrastructure (including buckets and VM)
-make vision_destroy
+# Destroy JD infrastructure (including buckets, networks and VM)
+
+make jde_demo_destroy
+
 ```
 ---
 
