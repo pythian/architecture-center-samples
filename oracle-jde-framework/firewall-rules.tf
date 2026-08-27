@@ -32,6 +32,20 @@ module "firewall_rules" {
         metadata = "INCLUDE_ALL_METADATA"
       }
       target_tags = ["icmp-access"]
+    },
+    {
+      name          = "jde-allow-internal-access"
+      description   = "Allow internal traffic within the VPC"
+      source_ranges = [values(module.network.subnets)[0].ip_cidr_range]
+      allow = [
+        {
+          protocol = "tcp"
+        }
+      ]
+      log_config = {
+        metadata = "INCLUDE_ALL_METADATA"
+      }
+      target_tags = ["internal-access"]
     }
   ]
 

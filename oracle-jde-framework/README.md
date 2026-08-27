@@ -106,31 +106,74 @@ make jde_demo_deploy
 ### 4. Stage Oracle JD Edwards EnterpriseOne required  Media files
 
 To deploy Oracle JD Edwards EnterpriseOne using [One-Click deployment](https://docs.oracle.com/en/applications/jd-edwards/one-click-provisioning/9.2/eoiol/index.html) process 
-you'll need to stage:
- 
-  - JD Edwards One Click provisioning
-  - Oracle Database 19c Software
-  - Oracle OPatch for 19c Database
-  - Oracle Database CPU Patch #39034528
-  - Oracle Weblogic 14c
-  - Oracle JDK 1.8
-  - Oracle Opatcvh for 14c Weblogic
-  - Oracle Weblogic CPU patch #39796866
-  - ojdbc8.jar, ons.jar, ucp.jar
+you'll need to stage Oracle Software from EDelivery, My Oracle Support and Oracle downloads.
+
+
+Software from edelivery.oracle.com 
+  - JD Edwards One-Click Provisioning 3.15 for Apps 9.2 Tools 9.2.26.1
+
+![Oracle JD Edwards Download](images/do_edel_jde.png "Oracle JD Edwards Download")
+
+ - Oracle Weblogic 14c
+
+![Oracle WLS 14c Download](images/do_edel_wls.png "Oracle Weblogic 14c Download")
+
+Oracle.com downloads
+ - Oracle Database 19c Enterprise Edition 19.3.0.0.0 https://www.oracle.com/database/technologies/oracle19c-linux-downloads.html file (LINUX.X64_193000_db_home.zip)
+ - Oracle JDK 1.8 https://www.oracle.com/asean/java/technologies/javase/javase8-archive-downloads.html file (jdk-8u202-linux-x64.tar.gz)
+ - Oracle JDBC driver: https://www.oracle.com/database/technologies/appdev/jdbc-downloads.html file (ojdbc8-full.tar.gz)
+
+Sofware from support.oracle.com:
+  - Oracle OPatch for 19c Database https://updates.oracle.com/download/6880880.html (OPatch 12.2.0.1.52 for DB 19.0.0.0.0)
+  - Oracle Database CPU Patch #39034528 https://updates.oracle.com/download/39034528.html
+  - Oracle Weblogic CPU patch #39796866 https://updates.oracle.com/download/39796866.html
+  - Oracle OPatch for 14c Weblogic #28186730 https://updates.oracle.com/download/28186730.html
+  
+Upload all the Oracle media to Bucket created by make jde_demo_deploy process 
+
+
 
 
 ```bash
 # Example
-gcloud storage cp V*.zip gs://oracle-ebs-toolkit-storage-bucket-9e70a5a7/
+gcloud storage cp * gs://oracle-jde-toolkit-storage-bucket-26dd45d7/
 
+# Verify that all required files are present in the bucket - if not please review download criteria and stage properly
+./scripts/check_oracle_media_on_bucket.sh gs://oracle-jde-toolkit-storage-bucket-26dd45d7
+  OK      LINUX.X64_193000_db_home.zip
+  OK      V1045131-01.zip
+  OK      V1053599-01.zip
+  OK      V1053600-01.zip
+  OK      V1053602-01.zip
+  OK      V1053603-01.zip
+  OK      V1053604-01.zip
+  OK      V1053605-01.zip
+  OK      V1053607-01.zip
+  OK      V1053608-01.zip
+  OK      V1053609-01.zip
+  OK      V1053610-01.zip
+  OK      V1053619-01.zip
+  OK      V1055306-01.zip
+  OK      V994956-01.zip
+  OK      jdk-8u202-linux-x64.tar.gz
+  OK      ojdbc8-full.tar.gz
+  OK      p28186730_1394224_Generic.zip
+  OK      p39034528_190000_Linux-x86-64.zip
+  OK      p39796866_141100_Generic.zip
+  OK      p6880880_190000_Linux-x86-64.zip
 
+  All required Oracle media files are present in gs://oracle-jde-toolkit-storage-bucket-26dd45d7.
+
+# Note: all remaining steps expecte this specific media and version to be in place (as automated processes)
 ```
 
 ---
 
-### 5. Deploy Oracle JD Edwards EnterpriseOne Demo container
+### 5. Prepare JD Edwards servers and setup
 
-This process lasts ~50-60 minutes
+Through this required server setup and software will be installed to servers.
+
+
 
 ```bash
 # Deploy changes
