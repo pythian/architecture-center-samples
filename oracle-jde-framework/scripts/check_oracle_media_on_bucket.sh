@@ -46,7 +46,6 @@ V1053610-01.zip
 V1053619-01.zip
 V1055306-01.zip
 V994956-01.zip
-jdk-8u202-linux-x64.tar.gz
 ojdbc8-full.tar.gz
 p28186730_1394224_Generic.zip
 p39034528_190000_Linux-x86-64.zip

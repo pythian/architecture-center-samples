@@ -16,6 +16,10 @@ if [ -z "$BUCKET" ]; then BUCKET=$(gcloud storage ls | grep oracle-jde-toolkit-s
 # paths
 local_media=/u02
 
+# Variables:
+db_sys_password="Manager123"
+web_wls_password="AdminPassword123"
+
 ## function list | Common
 is_root_user() {
     if [ "$(id -u)" -eq 0 ]; then
@@ -236,8 +240,10 @@ stage_jde_software() {
     copy_file_as_opc jde-demo-db oracle /u02/p39034528_190000_Linux-x86-64.zip /u01/p39034528_190000_Linux-x86-64.zip
 
     print_task "Staging Weblogic server:"
-    copy_file_as_opc jde-demo-web oracle /u02/jdk-8u202-linux-x64.tar.gz /u01/jdk-8u202-linux-x64.tar.gz
+    #copy_file_as_opc jde-demo-web oracle /u02/jdk-8u202-linux-x64.tar.gz /u01/jdk-8u202-linux-x64.tar.gz
     copy_file_as_opc jde-demo-web oracle /u02/V994956-01.zip /u01/V994956-01.zip
+    copy_file_as_opc jde-demo-web oracle /u02/p28186730_1394224_Generic.zip /u01/p28186730_1394224_Generic.zip
+    copy_file_as_opc jde-demo-web oracle /u02/p39796866_141100_Generic.zip /u01/p39796866_141100_Generic.zip
 
 
     ### EOF actual function betweens these comments
@@ -266,7 +272,7 @@ start_jde_provisioning_server() {
     
     ### actual function betweens these comments
     print_task "Unarachive Software on Provisioning server:"
-    #sudo find /u02/ -type f -name 'V105*.zip' -exec sudo unzip -q -o {} -d /u01 \;
+    sudo find /u02/ -type f -name 'V105*.zip' -exec sudo unzip -q -o {} -d /u01 \;
     sudo ls -l /u01
 
     print_task "Building Provisioning server:"
@@ -309,7 +315,7 @@ stage_oracle_database() {
     fi
 
     print_task "Staging RDBMS Software on Database server:"
-    execute_as_opc jde-demo-db oracle "mkdir -p /u01/app/oracle/product/19.0.0/db_1 /u01/app/oraInventory /u01/oradata /u01/DataDB /u01/ORATABLE /u01/ORAINDEX"
+    execute_as_opc jde-demo-db oracle "mkdir -p /u01/app/oracle/product/19.0.0/db_1 /u01/app/oraInventory /u01/oradata"
     execute_as_root jde-demo-db "echo -e 'inventory_loc=/u01/app/oraInventory\ninst_group=dba' | sudo tee /etc/oraInst.loc"
     execute_as_opc jde-demo-db oracle "unzip -qo /u01/LINUX.X64_193000_db_home.zip -d /u01/app/oracle/product/19.0.0/db_1"
     execute_as_opc jde-demo-db oracle "mv /u01/app/oracle/product/19.0.0/db_1/OPatch/ /u01/app/oracle/product/19.0.0/db_1/OPatch.12.2.0.1.17"
@@ -377,22 +383,22 @@ execute_as_root jde-demo-db "/u01/app/oracle/product/19.0.0/db_1/root.sh"
 export PATH=\$ORACLE_HOME/bin:$PATH 
 export ORACLE_SID=ORCL 
 export PDB_NAME=JDEORCL 
-exec dbca -silent -createDatabase                                                   \
+exec dbca -silent -createDatabase                                              \
      -templateName General_Purpose.dbc                                         \
-     -gdbname \${ORACLE_SID} -sid  \${ORACLE_SID} -responseFile NO_VALUE         \
+     -gdbname \${ORACLE_SID} -sid  \${ORACLE_SID} -responseFile NO_VALUE       \
      -characterSet AL32UTF8                                                    \
-     -sysPassword Manager123                                                 \
-     -systemPassword Manager123                                              \
+     -sysPassword ${db_sys_password}                                           \
+     -systemPassword ${db_sys_password}                                        \
      -createAsContainerDatabase true                                           \
      -numberOfPDBs 1                                                           \
-     -pdbName \${PDB_NAME}                                                      \
-     -pdbAdminPassword Manager123                                            \
+     -pdbName \${PDB_NAME}                                                     \
+     -pdbAdminPassword ${db_sys_password}                                      \
      -databaseType MULTIPURPOSE                                                \
      -memoryMgmtType auto_sga                                                  \
      -totalMemory 4000                                                         \
      -storageType FS                                                           \
-     -datafileDestination "/u01/oradata"                                        \
-     -redoLogFileSize 1024                                                       \
+     -datafileDestination "/u01/oradata"                                       \
+     -redoLogFileSize 1024                                                     \
      -emConfiguration NONE                                                     \
      -ignorePreReqs
     '"
@@ -424,12 +430,83 @@ export ORACLE_SID=ORCL
 export PDB_NAME=JDEORCL 
 exec sqlplus / as sysdba @/tmp/db_update.sql'"
 
-execute_as_opc jde-demo-db oracle "echo  'jdeorcl=(DESCRIPTION=(CONNECT_DATA=(SERVICE_NAME=jde-demo-db))(ADDRESS=(PROTOCOL=tcp)(HOST=r-jde-db)(PORT=1521)))' > /tmp/tnsnames.ora"
+execute_as_opc jde-demo-db oracle "echo  'jdeorcl=(DESCRIPTION=(CONNECT_DATA=(SERVICE_NAME=jdeorcl))(ADDRESS=(PROTOCOL=tcp)(HOST=jde-demo-db)(PORT=1521)))' > /tmp/tnsnames.ora"
 execute_as_opc jde-demo-db oracle "cp -v  /tmp/tnsnames.ora /u01/app/oracle/product/19.0.0/db_1/network/admin"
 
+execute_as_opc jde-demo-db oracle "echo 'export ORACLE_HOME=/u01/app/oracle/product/19.0.0/db_1' | sudo -u oracle tee -a /home/oracle/.bash_profile" 
+execute_as_opc jde-demo-db oracle "echo 'export ORACLE_SID=ORCL' | sudo -u oracle tee -a /home/oracle/.bash_profile" 
+execute_as_opc jde-demo-db oracle "echo 'export PATH=/u01/app/oracle/product/19.0.0/db_1/bin:\$PATH' | sudo -u oracle tee -a /home/oracle/.bash_profile" 
 
     ### EOF actual function betweens these comments
     echo -e "\nlog: $logfile"
     date              
  } 2>&1 | tee -a ${logfile}
 }
+
+stage_weblogic() {
+ logfile=${log_path}/$(date +%Y%m%d_%H%M%S)_${FUNCNAME[0]}.log
+ {
+    date
+    echo -e "\n\033[1m
+         =========================================================================
+         JD Edwards EntOne ON GCP TOOLKIT FUNCTION: ${FUNCNAME[0]}
+         =========================================================================
+         Function to provision Oracle WebLogic for the JDE
+         ------------------------------------------------------------------------- \033[0m"
+    
+    
+    print_task "Staging WLS Software on Database server:"
+    execute_as_opc jde-demo-web oracle "mkdir -p /u01/app/oraInventory /u01/app/wls"
+    execute_as_root jde-demo-web "echo -e 'inventory_loc=/u01/app/oraInventory\ninst_group=dba' | sudo tee /etc/oraInst.loc"
+    copy_file_as_opc jde-demo-web oracle /u01/jdk-8u491-linux-x64.tar.gz /u01/jdk-8u491-linux-x64.tar.gz
+
+    execute_as_opc jde-demo-web oracle "tar xzf /u01/jdk-8u491-linux-x64.tar.gz -C /u01"
+    execute_as_opc jde-demo-web oracle "mv /u01/jdk1.8.0_491 /u01/jdk; /u01/jdk/bin/java -version"
+
+    execute_as_opc jde-demo-web oracle "unzip -qo /u01/V994956-01.zip -d /u01/"
+
+    execute_as_opc jde-demo-web oracle "echo 'export JAVA_HOME=/u01/jdk' | sudo -u oracle tee -a /home/oracle/.bash_profile" 
+    execute_as_opc jde-demo-web oracle "echo 'export PATH=\$JAVA_HOME/bin:\$PATH' | sudo -u oracle tee -a /home/oracle/.bash_profile" 
+
+    print_task "Installing Weblogic Software on Database server:"
+    execute_as_opc jde-demo-web oracle "echo '
+[ENGINE]
+Response Version=1.0.0.0.0
+[GENERIC]
+ORACLE_HOME=/u01/app/wls
+INSTALL_TYPE=WebLogic Server
+DECLINE_AUTO_UPDATES=true' > /u01/wls.rsp"
+        execute_as_opc jde-demo-web oracle "/u01/jdk/bin/java -jar /u01/fmw_14.1.1.0.0_wls.jar -silent -responseFile /u01/wls.rsp -invPtrLoc /etc/oraInst.loc"
+    
+    execute_as_opc jde-demo-web oracle "unzip -qo /u01/p39796866_141100_Generic.zip -d /u01/"
+    execute_as_opc jde-demo-web oracle "unzip -qo /u01/p28186730_1394224_Generic.zip -d /u01/"
+
+    execute_as_opc jde-demo-web oracle "/u01/jdk/bin/java -jar /u01/6880880/opatch_generic.jar  -silent oracle_home=/u01/app/wls  -invPtrLoc /etc/oraInst.loc"
+    execute_as_opc jde-demo-web oracle "/u01/app/wls/OPatch/opatch  apply /u01/39796866 -silent oracle_home=/u01/app/wls  -invPtrLoc /etc/oraInst.loc"
+
+    print_task "Creating Weblogic Domain:"
+    
+    execute_as_opc jde-demo-web oracle "sh -c '
+    /u01/app/wls/oracle_common/common/bin/unpack.sh \
+        -template=/u01/app/wls/wlserver/common/templates/wls/wls.jar \
+        -domain=/u01/app/wls/user_projects/domains/base_domain \
+        -user_name=weblogic \
+        -password=${web_wls_password} '"
+
+    execute_as_opc jde-demo-web oracle "sed -i 's/SecureListener=true/SecureListener=false/g' /u01/app/wls/user_projects/domains/base_domain/nodemanager/nodemanager.properties"
+
+    print_task "Startup Weblogic & NodeManager:"
+    execute_as_opc jde-demo-web oracle "sh -c 'nohup /u01/app/wls/user_projects/domains/base_domain/bin/startNodeManager.sh > /home/oracle/nodemanager.out 2>&1 &'"
+    execute_as_opc jde-demo-web oracle "sh -c 'nohup /u01/app/wls/user_projects/domains/base_domain/startWebLogic.sh > /home/oracle/WebLogic.out 2>&1 &'"
+
+    ### EOF actual function betweens these comments
+    echo -e "\nlog: $logfile"
+    date              
+ } 2>&1 | tee -a ${logfile}
+}
+
+# create_and_dist_opc_key
+# stage_jde_software
+# start_jde_provisioning_server
+# stage_oracle_database
+# stage_weblogic

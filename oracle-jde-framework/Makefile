@@ -56,17 +56,6 @@ validate: ## Validate Terraform configuration
 	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)"
 	@echo "Terraform configuration is valid."
 
-plan: ## Validate Terraform configuration
-	terraform -chdir=$(TF_DIR) plan \
-	  -var="project_id=$(PROJECT_ID_CLEAN)" \
-	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)"
-	@echo "Terraform plan generated."
-
-deploy: ## Apply Terraform configuration
-	terraform -chdir=$(TF_DIR) apply -auto-approve \
-	  -var="project_id=$(PROJECT_ID_CLEAN)" \
-	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)"
-
 deploy_oracle_ebs_scripts: ## Deploy Oracle EBS scripts to instances
 	@echo ""
 	@echo "\033[1m>>> Getting EBS instance zone from Terraform output \033[0m"
@@ -109,10 +98,21 @@ jde_demo_destroy: ## Destroy Terraform configuration with Oracle EBS Vision
 	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)" \
 	  -var="oracle_jde_vision=true"
 
-destroy: ## Destroy Terraform-managed infrastructure
-	terraform -chdir=$(TF_DIR) destroy -auto-approve \
-	  -var="project_id=$(PROJECT_ID_CLEAN)" \
-	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)"
+jde_demo_deploy_soft: ## Install JDE requried software on the instances
+	@echo ""
+	@echo "\033[1m>>> Getting JDE instance zone from Terraform output \033[0m"
+	@jde_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw vision_instance_zone); \
+	echo "Zone: $$jde_gce_zone"; \
+	echo ""; \
+	echo "\033[1m>>> Copying FUNCT to JDE provision instance \033[0m"; \
+	gcloud compute scp --tunnel-through-iap --zone "$$jde_gce_zone" --project=$(PROJECT_ID_CLEAN) \
+	scripts/jde/functions.sh jde-demo-prov:~; \
+	echo ""; \
+	echo "\033[1m>>> Running JDE Software provisioning \033[0m"; \
+	gcloud compute ssh --zone "$$jde_gce_zone" "jde-demo-prov" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
+	  --command "source functions.sh; stage_weblogic;" -- -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20
+
+
 
 verify-gcp-access: ## Verify GCP access and required IAM roles
 	@if [ -z "$(PROJECT_ID_CLEAN)" ]; then \
@@ -156,45 +156,3 @@ verify-gcp-access: ## Verify GCP access and required IAM roles
 	echo ""; \
 	echo " GCP access check passed for project: $(PROJECT_ID_CLEAN)"
 
-vision_deploy_oracle_ebs: ## Deploy Oracle EBS Vision application
-	@echo ""
-	@echo "\033[1m>>> Getting Vision instance zone from Terraform output \033[0m"
-	@vision_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw vision_instance_zone); \
-	echo "Zone: $$vision_gce_zone"; \
-	echo ""; \
-	echo "\033[1m>>> Creating /scripts on oracle-vision \033[0m"; \
-	gcloud compute ssh --zone "$$vision_gce_zone" "oracle-vision" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo mkdir -vp /scripts && sudo chmod -v 777 /scripts"; \
-	echo ""; \
-	echo "\033[1m>>> Copying /scripts/* to oracle-vision \033[0m"; \
-	gcloud compute scp --tunnel-through-iap --zone "$$vision_gce_zone" --project=$(PROJECT_ID_CLEAN) \
-	scripts/vision/* oracle-vision:/scripts; \
-	echo ""; \
-	echo "\033[1m>>> Ownership updates /scripts/ on oracle-vision \033[0m"; \
-	gcloud compute ssh --zone "$$vision_gce_zone" "oracle-vision" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo chown -Rfv root:root /scripts && sudo chmod -Rfv 755 /scripts/*"; \
-	echo ""; \
-	echo "\033[1m>>> Deploying Oracle EBS vision: Runtime ~ 50-60 minutes \033[0m"; \
-	gcloud compute ssh --zone "$$vision_gce_zone" "oracle-vision" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo /scripts/vision_apps_fs_prepare.sh | tee -a /scripts/vision_apps_fs_prepare.sh.\$$(date +%Y%m%d_%H%M%S).log"
-
-vision_ebs_troubleshoot: ## Troubleshoot Oracle EBS Vision deployment
-	@echo ""
-	@echo "\033[1m>>>Troubleshooting - printing deployment Oracle EBS details \033[0m"
-	@vision_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw vision_instance_zone); \
-	gcloud compute ssh --zone "$$vision_gce_zone" "oracle-vision" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo bash -c '/scripts/vision_apps_troubleshoot.sh | tee -a /scripts/vision_apps_troubleshoot.sh.\$$(date +%Y%m%d_%H%M%S).log'"
-
-vision_ebs_start: ## Start Oracle EBS Vision application
-	@echo ""
-	@echo "\033[1m>>>Oracle Vision EBS: Startup \033[0m"
-	@vision_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw vision_instance_zone); \
-	gcloud compute ssh --zone "$$vision_gce_zone" "oracle-vision" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo -u oracle bash -c '/scripts/vision_apps_startup.sh | tee -a /scripts/vision_apps_startup.sh.log'"
-
-vision_ebs_stop: ## Stop Oracle EBS Vision application
-	@echo ""
-	@echo "\033[1m>>>Oracle Vision EBS: Stop \033[0m"
-	@vision_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw vision_instance_zone); \
-	gcloud compute ssh --zone "$$vision_gce_zone" "oracle-vision" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo -u oracle bash -c 'source /u01/install/APPS/19.0.0/EBSCDB_apps.env | echo "shut abort" | sqlplus / as sysdba; sleep 5; ps -fea | grep oracle'"

@@ -120,7 +120,6 @@ Software from edelivery.oracle.com
 
 Oracle.com downloads
  - Oracle Database 19c Enterprise Edition 19.3.0.0.0 https://www.oracle.com/database/technologies/oracle19c-linux-downloads.html file (LINUX.X64_193000_db_home.zip)
- - Oracle JDK 1.8 https://www.oracle.com/asean/java/technologies/javase/javase8-archive-downloads.html file (jdk-8u202-linux-x64.tar.gz)
  - Oracle JDBC driver: https://www.oracle.com/database/technologies/appdev/jdbc-downloads.html file (ojdbc8-full.tar.gz)
 
 Sofware from support.oracle.com:
@@ -155,7 +154,6 @@ gcloud storage cp * gs://oracle-jde-toolkit-storage-bucket-26dd45d7/
   OK      V1053619-01.zip
   OK      V1055306-01.zip
   OK      V994956-01.zip
-  OK      jdk-8u202-linux-x64.tar.gz
   OK      ojdbc8-full.tar.gz
   OK      p28186730_1394224_Generic.zip
   OK      p39034528_190000_Linux-x86-64.zip

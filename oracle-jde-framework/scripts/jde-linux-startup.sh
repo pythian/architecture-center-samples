@@ -40,7 +40,7 @@ function install_yum_updates()
     libxcrypt-devel.i686 libnsl libnsl.i686 librdmacm  bc binutils compat-openssl11 elfutils-libelf fontconfig \
     glibc glibc-devel ksh libaio libasan liblsan libX11 libXau libXi libXrender libXtst libxcrypt-compat libgcc \
     libibverbs libnsl librdmacm libstdc++ libxcb libvirt-libs make policycoreutils \
-    policycoreutils-python-utils smartmontools sysstat
+    policycoreutils-python-utils smartmontools sysstat unixODBC.x86_64 samba samba-client samba-common libaio-devel.x86_64
     dnf install --enablerepo=ol9_codeready_builder libyaml-devel -y
 
     # one off RPM
@@ -102,6 +102,12 @@ function update_os_config()
     systemctl stop firewalld
     systemctl disable firewalld
 
+    # start SMB
+    systemctl enable smb nmb
+    systemctl start smb nmb
+    systemctl status nmb
+    systemctl status smb
+
     # OPC as sudoers
     echo "Adding opc user to sudoers"
     echo "opc ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -109,6 +115,7 @@ function update_os_config()
     # /etc/ssh/sshd_config update
     echo "Updating /etc/ssh/sshd_config"
     sed -i '/ClientAliveInterval/d' /etc/ssh/sshd_config
+    echo "# JDE required settings" >> /etc/ssh/sshd_config
     echo "ClientAliveInterval 3600" >> /etc/ssh/sshd_config
 
     sed -i '/AddressFamily/d' /etc/ssh/sshd_config
@@ -132,9 +139,9 @@ function users_groups_create()
     groupadd -g 1105 jde920
 
     # users
-    useradd -d /home/opc -g opc -m -s /bin/bash opc
-    useradd -d /home/oracle -g dba -m -s /bin/bash oracle
-    useradd -d /home/jde920 -g jde920 -m -s /bin/ksh jde920
+    useradd -d /home/opc -u 1000 -g opc -m -s /bin/bash opc
+    useradd -d /home/oracle -u 1001 -g dba -m -s /bin/bash oracle
+    useradd -d /home/jde920 -u 1002 -g jde920 -m -s /bin/ksh jde920
 
     # users to groups
     usermod -a -G oracle opc
@@ -173,7 +180,7 @@ function user_profile_updates()
     # distribution id
     grep -q "CV_ASSUME_DISTID" /root/.bash_profile|| echo "export CV_ASSUME_DISTID=OL7" >>  /root/.bash_profile
     grep -q "CV_ASSUME_DISTID" /home/opc/.bash_profile|| echo "export CV_ASSUME_DISTID=OL7" >>  /home/opc/.bash_profile
-    grep -q "CV_ASSUME_DISTID" /home/oracle/.bash_profile|| echo "export CV_ASSUME_DISTID=OL7" >>  /home/oracle/.bash_profile
+    grep -q "CV_ASSUME_DISTID" /home/oracle/.bash_profile|| echo "export CV_ASSUME_DISTID=OL8" >>  /home/oracle/.bash_profile
 
     # umasks
     grep -q "umask" /root/.bash_profile|| echo "export umask=0022" >>  /root/.bash_profile
