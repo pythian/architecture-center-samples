@@ -56,28 +56,6 @@ validate: ## Validate Terraform configuration
 	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)"
 	@echo "Terraform configuration is valid."
 
-deploy_oracle_ebs_scripts: ## Deploy Oracle EBS scripts to instances
-	@echo ""
-	@echo "\033[1m>>> Getting EBS instance zone from Terraform output \033[0m"
-	@ebs_gce_zone=$$(terraform -chdir=$(TF_DIR) output -raw apps_instance_zone); \
-	echo "Zone: $$ebs_gce_zone"; \
-	echo ""; \
-	echo "\033[1m>>> Creating /scripts on oracle-ebs-db \033[0m"; \
-	gcloud compute ssh --zone "$$ebs_gce_zone" "oracle-ebs-db" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo mkdir -vp /scripts && sudo chmod -v 777 /scripts"; \
-	echo ""; \
-	echo "\033[1m>>> Copying /scripts/* to oracle-ebs-db \033[0m"; \
-	gcloud compute scp --tunnel-through-iap --zone "$$ebs_gce_zone" --project=$(PROJECT_ID_CLEAN) \
-	scripts/ebs/* oracle-ebs-db:/scripts; \
-	echo ""; \
-	echo "\033[1m>>> Creating /scripts on oracle-ebs-apps \033[0m"; \
-	gcloud compute ssh --zone "$$ebs_gce_zone" "oracle-ebs-apps" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "sudo mkdir -vp /scripts && sudo chmod -v 777 /scripts"; \
-	echo ""; \
-	echo "\033[1m>>> Copying /scripts/* to oracle-ebs-apps \033[0m"; \
-	gcloud compute scp --tunnel-through-iap --zone "$$ebs_gce_zone" --project=$(PROJECT_ID_CLEAN) \
-	scripts/ebs/* oracle-ebs-apps:/scripts
-
 VISION ?= false
 
 jde_demo_plan: ## Plan Terraform configuration with Oracle EBS Vision
@@ -110,7 +88,8 @@ jde_demo_deploy_soft: ## Install JDE requried software on the instances
 	echo ""; \
 	echo "\033[1m>>> Running JDE Software provisioning \033[0m"; \
 	gcloud compute ssh --zone "$$jde_gce_zone" "jde-demo-prov" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
-	  --command "source functions.sh; stage_weblogic;" -- -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20
+	  --command "source functions.sh; create_and_dist_opc_key;  stage_jde_software;  start_jde_provisioning_server; \
+	   stage_oracle_database;  stage_weblogic;  stage_deployment_server" -- -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20
 
 
 

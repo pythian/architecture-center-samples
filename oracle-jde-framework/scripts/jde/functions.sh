@@ -505,8 +505,51 @@ DECLINE_AUTO_UPDATES=true' > /u01/wls.rsp"
  } 2>&1 | tee -a ${logfile}
 }
 
+stage_deployment_server() {
+ logfile=${log_path}/$(date +%Y%m%d_%H%M%S)_${FUNCNAME[0]}.log
+ {
+    date
+    echo -e "\n\033[1m
+         =========================================================================
+         JD Edwards EntOne ON GCP TOOLKIT FUNCTION: ${FUNCNAME[0]}
+         =========================================================================
+         Function to provision JDE Deployment Server on Windows
+         ------------------------------------------------------------------------- \033[0m"
+    
+    ### actual function betweens these comments
+    print_task "Create OPC user in Windows Deployment Server"
+    zone=$(gcloud compute instances list --filter="name=$(hostname)" --format="value(zone)")
+    gcloud compute reset-windows-password jde-demo-dep --user=opc --zone=${zone} --quiet | tee -a /tmp/opc_user.txt
+    pw=$(grep password /tmp/opc_user.txt | awk '{print $2}')
+
+    print_task "Reset OPC user password in Windows Deployment Server to match requriemnets"
+    gcloud compute instances add-metadata jde-demo-dep --zone=${zone} --metadata windows-startup-script-ps1="net user opc Your_Password+132"
+    gcloud compute instances reset jde-demo-dep --zone=${zone}
+    sleep 60
+
+    print_task "Adding Firewall rules to allow RDP and other ports"
+    echo "New-NetFirewallRule -DisplayName 'JDESMC_RDP' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 445,3389,5150,5985,6017-6022,14502-14510" > setup_fw.ps1
+    gcloud compute instances add-metadata jde-demo-dep --zone=${zone} --metadata-from-file windows-startup-script-ps1=setup_fw.ps1
+    gcloud compute instances reset jde-demo-dep --zone=${zone}
+    sleep 60
+
+    print_task "Adding Firewall rules to allow RRD outbound traffic"
+    gcloud compute instances add-metadata jde-demo-dep --zone=${zone} \
+  --metadata windows-startup-script-ps1="New-NetFirewallRule -DisplayName 'JDESMC_RRD_out' -Direction Outbound -Action Allow -Protocol Any"
+    gcloud compute instances reset jde-demo-dep --zone=${zone}
+    sleep 60
+
+    ### EOF actual function betweens these comments
+    echo -e "\nlog: $logfile"
+    date              
+ } 2>&1 | tee -a ${logfile}
+}
+
+
+
 # create_and_dist_opc_key
 # stage_jde_software
 # start_jde_provisioning_server
 # stage_oracle_database
 # stage_weblogic
+# stage_deployment_server
