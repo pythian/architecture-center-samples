@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# This script contains utility functions for the EBS project
+# This script contains utility functions for the JDE project
+# Ref: https://docs.oracle.com/en/applications/jd-edwards/one-click-provisioning/9.2/eoiol/performing-common-setup-for-all-linux-servers-opl.html
 
 #Source Env
 # if [ -f ~/scripts/environment ]; then
@@ -516,36 +517,82 @@ stage_deployment_server() {
          Function to provision JDE Deployment Server on Windows
          ------------------------------------------------------------------------- \033[0m"
     
-    ### actual function betweens these comments
-    print_task "Create OPC user in Windows Deployment Server"
-    zone=$(gcloud compute instances list --filter="name=$(hostname)" --format="value(zone)")
-    gcloud compute reset-windows-password jde-demo-dep --user=opc --zone=${zone} --quiet | tee -a /tmp/opc_user.txt
-    pw=$(grep password /tmp/opc_user.txt | awk '{print $2}')
+#     ### actual function betweens these comments
+     print_task "Create OPC user in Windows Deployment Server"
+     zone=$(gcloud compute instances list --filter="name=$(hostname)" --format="value(zone)")
+     gcloud compute reset-windows-password jde-demo-dep --user=opc --zone=${zone} --quiet | tee -a /tmp/opc_user.txt
+     pw=$(grep password /tmp/opc_user.txt | awk '{print $2}')
 
-    print_task "Reset OPC user password in Windows Deployment Server to match requriemnets"
-    gcloud compute instances add-metadata jde-demo-dep --zone=${zone} --metadata windows-startup-script-ps1="net user opc Your_Password+132"
-    gcloud compute instances reset jde-demo-dep --zone=${zone}
-    sleep 60
+#     print_task "Reset OPC user password in Windows Deployment Server to match requriemnets"
+#     gcloud compute instances add-metadata jde-demo-dep --zone=${zone} --metadata windows-startup-script-ps1="net user opc Your_Password+132"
+#     gcloud compute instances reset jde-demo-dep --zone=${zone}
+#     sleep 60
 
-    print_task "Adding Firewall rules to allow RDP and other ports"
-    echo "New-NetFirewallRule -DisplayName 'JDESMC_RDP' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 445,3389,5150,5985,6017-6022,14502-14510" > setup_fw.ps1
-    gcloud compute instances add-metadata jde-demo-dep --zone=${zone} --metadata-from-file windows-startup-script-ps1=setup_fw.ps1
-    gcloud compute instances reset jde-demo-dep --zone=${zone}
-    sleep 60
+#     print_task "Adding Firewall rules to allow RDP and other ports"
+#     echo "New-NetFirewallRule -DisplayName 'JDESMC_RDP' -Direction Inbound -Action Allow -Protocol TCP -LocalPort 445,3389,5150,5985,6017-6022,14502-14510" > setup_fw.ps1
+#     gcloud compute instances add-metadata jde-demo-dep --zone=${zone} --metadata-from-file windows-startup-script-ps1=setup_fw.ps1
+#     gcloud compute instances reset jde-demo-dep --zone=${zone}
+#     sleep 60
 
-    print_task "Adding Firewall rules to allow RRD outbound traffic"
-    gcloud compute instances add-metadata jde-demo-dep --zone=${zone} \
-  --metadata windows-startup-script-ps1="New-NetFirewallRule -DisplayName 'JDESMC_RRD_out' -Direction Outbound -Action Allow -Protocol Any"
-    gcloud compute instances reset jde-demo-dep --zone=${zone}
-    sleep 60
+#     print_task "Adding Firewall rules to allow RRD outbound traffic"
+#     gcloud compute instances add-metadata jde-demo-dep --zone=${zone} \
+#   --metadata windows-startup-script-ps1="New-NetFirewallRule -DisplayName 'JDESMC_RRD_out' -Direction Outbound -Action Allow -Protocol Any"
+#     gcloud compute instances reset jde-demo-dep --zone=${zone}
+#     sleep 60
+
+    # 1. Fetch project ID and construct DNS suffix in Bash
+    project_id=$(gcloud config get-value project)
+    dnsSuffix="c.${project_id}.internal"
+
+    print_task "Updating Windows Deployment Server config for JDE"
+
+cat << 'EOF' > full_windows_setup.ps1
+# Update or create the opc user password directly
+net user opc Your_Password+132
+
+# Enable and configure WinRM quietly
+winrm quickconfig -q
+
+# Enable PowerShell Remote Management
+Enable-PSRemoting -Force
+
+# Create Inbound Firewall Rule
+New-NetFirewallRule -DisplayName "JDESMC_RDP" -Direction Inbound -Action Allow -Protocol TCP -LocalPort @("445","3389","5150","5985","6017-6022","14502-14510")
+
+# Create Outbound Firewall Rule
+New-NetFirewallRule -DisplayName "JDESMC_RRD_out" -Direction Outbound -Action Allow -Protocol Any
+
+# Set DNS Suffix settings
+$adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | Select-Object -First 1
+Set-DnsClient -InterfaceAlias $adapter.Name -ConnectionSpecificSuffix "TARGET_DNS_SUFFIX"
+Set-DnsClientGlobalSetting -SuffixSearchList @("TARGET_DNS_SUFFIX")
+
+# Change Security Option (NTLMv2 only)
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa" -Name "LmCompatibilityLevel" -Value 3 -Type DWord
+
+# Set MTU to 1500 for the Ethernet interface
+Get-NetIPInterface | Where-Object { ($_.InterfaceAlias -eq "Ethernet") -and ($_.AddressFamily -eq "IPv4") -and ($_.NlMtu -gt 0) } | Set-NetIPInterface -NlMtuBytes 1500
+EOF
+
+# 3. Replace the placeholder with your actual $dnsSuffix value
+sed -i "s/TARGET_DNS_SUFFIX/${dnsSuffix}/g" full_windows_setup.ps1
+
+ cat full_windows_setup.ps1
+
+    print_task "Restarging Windows Deployment Server to apply changes"
+    
+# 4. Attach metadata and reset VM
+gcloud compute instances add-metadata jde-demo-dep \
+  --zone="${zone}" \
+  --metadata-from-file windows-startup-script-ps1=full_windows_setup.ps1
+
+gcloud compute instances reset jde-demo-dep --zone="${zone}"
 
     ### EOF actual function betweens these comments
     echo -e "\nlog: $logfile"
     date              
  } 2>&1 | tee -a ${logfile}
 }
-
-
 
 # create_and_dist_opc_key
 # stage_jde_software
