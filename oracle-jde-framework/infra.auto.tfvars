@@ -13,20 +13,6 @@ subnets = [{
   subnet_flow_logs      = true
 }]
 
-# EBS Apps VM Configuration
-ebs_apps_server_internal_ip = "10.115.0.20"
-apps_machine_type           = "e2-standard-4"
-apps_boot_disk_type         = "pd-balanced"
-apps_boot_disk_size         = 512
-apps_boot_disk_auto_delete  = true
-
-# EBS DB VM Configuration
-ebs_db_server_internal_ip = "10.115.0.25"
-dbs_machine_type          = "e2-standard-8"
-dbs_boot_disk_type        = "pd-balanced"
-dbs_boot_disk_size        = 1024
-dbs_boot_disk_auto_delete = true
-
 ## JDE DEMO config
 
 # JD Edwards EnterpriseOne DEMO Provisioning Server jde_demo_prov

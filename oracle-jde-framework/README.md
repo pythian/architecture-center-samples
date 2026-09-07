@@ -6,7 +6,8 @@ This folder provides Terraform configurations and Makefile automation to deploy 
 ## Architectural Diagram
 
 ### Oracle JD Edwards Demo on GCP
-![Oracle JD Edwards Demo Technical Architecture Diagram](images/Oracle%20Vision%20on%20GCP_%20Technical%20Architecture%20diagram.png "Oracle JD Edwards Demo on GCP Technical Architecture Diagram")
+![Oracle JD Edwards Demo Technical Architecture Diagram](images/JD_ENT_ONE_DEMO_GCP_tech_arch.png "Oracle JD Edwards Demo on GCP Technical Architecture Diagram")
+
 
 ## Prerequisites
 
@@ -79,7 +80,7 @@ make verify-gcp-access
 Terraform uses Application Default Credentials (ADC) to interact with GCP. Run the following command before initializing Terraform:
 
 ```bash
-gcloud auth application-default login
+gcloud auth login
 ```
 
 ---
@@ -128,17 +129,14 @@ Sofware from support.oracle.com:
   - Oracle Weblogic CPU patch #39796866 https://updates.oracle.com/download/39796866.html
   - Oracle OPatch for 14c Weblogic #28186730 https://updates.oracle.com/download/28186730.html
   
-Upload all the Oracle media to Bucket created by make jde_demo_deploy process 
-
-
-
+Upload all the Oracle media to Bucket created by make jde_demo_deploy process (see output of make jde_demo_deploy)
 
 ```bash
 # Example
-gcloud storage cp * gs://oracle-jde-toolkit-storage-bucket-26dd45d7/
+gcloud storage cp jde_media/* $BUCKET/
 
 # Verify that all required files are present in the bucket - if not please review download criteria and stage properly
-./scripts/check_oracle_media_on_bucket.sh gs://oracle-jde-toolkit-storage-bucket-26dd45d7
+./scripts/check_oracle_media_on_bucket.sh $BUCKET
   OK      LINUX.X64_193000_db_home.zip
   OK      V1045131-01.zip
   OK      V1053599-01.zip
@@ -160,7 +158,7 @@ gcloud storage cp * gs://oracle-jde-toolkit-storage-bucket-26dd45d7/
   OK      p39796866_141100_Generic.zip
   OK      p6880880_190000_Linux-x86-64.zip
 
-  All required Oracle media files are present in gs://oracle-jde-toolkit-storage-bucket-26dd45d7.
+  All required Oracle media files are present in $BUCKET.
 
 # Note: all remaining steps expecte this specific media and version to be in place (as automated processes)
 ```
@@ -169,44 +167,160 @@ gcloud storage cp * gs://oracle-jde-toolkit-storage-bucket-26dd45d7/
 
 ### 5. Prepare JD Edwards servers and setup
 
-Through this required server setup and software will be installed to servers.
-
+Through this required server setup and software will be installed to servers. Following actions are being completed:
+ - common OS account opc created and ssh keys distributed accross for the communications
+ - Reqruied software stage from Bucket to appropiate servers
+ - Created and Started JDE Provisioning server
+ - Provisioned and configured Oracle Database and Listener
+ - Provisioned Oracle Weblogic server and domain created
+ - Prepared Windows Deployment Server (optional)
+ 
 
 
 ```bash
-# Deploy changes
+# Deploy JD EntOne required software - runtime ~ 1h15mins
 make jde_demo_deploy_soft
 ```
 
+For IAP tunelling purposes add below entries to /etc/hosts (win: C:\Windows\System32\drivers\etc\hosts)
 
 ```bash
 # Mac hosts file 
 cat /etc/hosts
-127.0.0.1 jde-demo-prov.c.oracle-ebs-toolkit-demo.internal jde-demo-prov
-127.0.0.1 jde-demo-db.c.oracle-ebs-toolkit-demo.internal jde-demo-db
-127.0.0.1 jde-demo-ent.c.oracle-ebs-toolkit-demo.internal jde-demo-ent
-127.0.0.1 jde-demo-web.c.oracle-ebs-toolkit-demo.internal jde-demo-web
-127.0.0.1 jde-demo-dep.c.oracle-ebs-toolkit-demo.internal jde-demo-dep
+127.0.0.1 jde-demo-prov.c.$PROJECT_ID$ jde-demo-prov
+127.0.0.1 jde-demo-db.c.$PROJECT_ID$ jde-demo-db
+127.0.0.1 jde-demo-ent.c.$PROJECT_ID$ jde-demo-ent
+127.0.0.1 jde-demo-web.c.$PROJECT_ID$ jde-demo-web
+127.0.0.1 jde-demo-dep.c.$PROJECT_ID$ jde-demo-dep
 
 ```
 
 Open IAP tunnel
 
 ```bash
-# open tunnel
-gcloud compute ssh "oracle-vision" --tunnel-through-iap  \
- --project "oracle-ebs-toolkit" -- -L 8000:localhost:8000
+
+# open 2 tunnels for provisioning server and JD EntONe
+gcloud compute ssh --zone "$ZONE$" "jde-demo-prov" --tunnel-through-iap  \
+  --project "$PROJECT_ID$"  -- -L 3000:localhost:3000 -L 8998:localhost:8998
+gcloud compute ssh --zone "$ZONE$" "jde-demo-web" --tunnel-through-iap  \
+  --project "$PROJECT_ID$"   -- -L 7001:localhost:7001 -L 8000:localhost:8000
+
 
 ```
 
-Add http://apps.example.com:8000 to the Java Security Exception list.
-Open a browser and login to http://apps.example.com:8000 using sysadmin/SYSADMIN12 (case sensitive)
-
 ---
 
-### 6. Available additional commands
+### 6. Deploy JD Enterprise One using OncClick Deployment
 
-List of commands available
+#### 6.1 Configure Server Manager Account
+Documentation: https://docs.oracle.com/en/applications/jd-edwards/one-click-provisioning/9.2/eoiol/configuring-server-manager-account-lc.html
+
+- Once tunnels are open, open browser and access provisioning sever on port 3000
+
+*Note: this will be unsecure connection - so you must accept to connect*
+
+![Step1](images/step1.png "Management Console")
+
+- Click Configure and provide 
+  - Server Manager Admin Password
+  - WebLogic Server Password 
+- Those are passwords to connect Provisioning Server Manager
+
+![Step2](images/step2.png "Management Console")
+
+- Changing default password wheel will be there for few minutes, this process provisions Service Manager (SM) Console with provided passwords.
+- Server log: root@jde-demo-prov:/u01/SMConsole/SCFMC/logs/e1agent_0.log
+
+![Step3](images/step3.png "Management Console")
+
+#### 6.2 Create Deployment plan
+Documentation: https://docs.oracle.com/en/applications/jd-edwards/one-click-provisioning/9.2/eoiol/orchestrating-using-advanced-mode-lc.html#Orchestrating-an-Advanced-Deployment-Plan
+
+- Click Confiugre Tile and provide jde_admin password (one entered previous step) and Save Configuration
+
+
+![Step3](images/step_2_1.png "Management Console - Configure")
+
+
+- Provide passwords and SSH keys for the provisioning server
+  - Look at ssh key file downloaded into root dir: jde_oneclick_key.openssh
+  - for Windows deployment Server use user: **opc**, password: **Your_Password+132**
+  - JDE user password is for FrontEnd access 
+  - Site Key passphrase can be skipped
+
+![Step4](images/step_2_2.png "Management Console - Configure")
+
+- Click on Advanced Tile and Add Database Server
+  - Instance name: **JDEORCL**
+  - Hostname name: **jde-demo-db.c.$DOMAIN** *note: important to have full domain*
+  - DB Install Path: **/u01/app/oracle/product/19.0.0/db_1**
+  - DB Admin Password: **Manager123**  *note: this is PDB:JDEORCL system password*
+  - Net Service Name: **JDEORCL**
+  - Use ASM feature: **Disabled**
+  - JDE DB Install Directory: **/u01/DataDB**
+  - JDE DB Table Directory: **/u01/ORATABLE**
+  - DE DB Index Directory: **/u01/ORAINDEX**
+  - Net Service Name: **JDEORCL**
+  - Schemas: **Shared Protoype Pristine Development**
+  - Demo Data: **Development Prototype**
+- Click OK, this will trigger input validation
+- Validation logfile: *[root@jde-demo-prov ~]# tail -f /u01/E1ProvisionPrime/InputValidation/log/JDEORCL_databaseServer_debug.log*
+
+![Step5](images/step_2_3.png "Management Console - Configure")
+
+- Click on Advanced Tile and Add Enterprise Server
+  - Instance name: **DemoEnt**
+  - Hostname name: **jde-demo-ent.c.$DOMAIN** *note: important to have full domain*
+  - HA Enabled: **Disabled**
+  - Provide JDBC drivers - part of previously downloaded ojdbc8-full.tar.gz file
+  - Server Type: **Batch Logic** 
+  - Database Instance: **JDEORCL**
+  - Patchcodes: **Development Prototype Pristing**
+- Click OK, this will trigger input validation
+- Validation logfile: *[root@jde-demo-prov ~]# tail -f /u01/E1ProvisionPrime/InputValidation/log/DemoEnt_entServer_debug.log*
+
+![Step6](images/step_2_4.png "Management Console - Configure")
+
+- Click on Advanced Tile and Add Web Server:
+  - Instance name: **DedicatedHTML**
+  - Hostname name: **jde-demo-web.c.$DOMAIN** *note: important to have full domain*
+  - Port: **8001**
+  - Type: **HTML Server**
+  - Enterprise Server Instance: **DemoEnt** 
+  - PathCode: **DEVELOPMENT**
+  - Standard JAS: **Disabled**
+  - User Name: **weblogic**
+  - Password: **AdminPassword123** *note: user created in previous steps**
+  - Admin Port: **7001**
+  - Install Path: **/u01/app/wls**
+  - JDK Install Path: **/u01/jdk**
+  - HA Enabled: **Disabled**
+- Click OK, this will trigger input validation
+- Validation logfile: *[root@jde-demo-prov ~]# tail -f /u01/E1ProvisionPrime/InputValidation/log/DedicatedHTML_webServer_debug.log*
+
+![Step7](images/step_2_5.png "Management Console - Configure")
+
+
+- [!!! OPTIONAL !!!] Only if required - Click on Advanced Tile and Add Deploument Server:
+  - Instance name: **DemoDEP**
+  - Hostname name: **jde-demo-dep.c.$DOMAIN** *note: important to have full domain*
+  - Location: **US**
+  - Installation Drive: **C:**
+- Click OK, this will trigger input validation
+- Validation logfile: *[root@jde-demo-prov ~]# tail -f /u01/E1ProvisionPrime/InputValidation/log/DemoDEP_depServer_debug.log*
+
+![Step8](images/step_2_6.png "Management Console - Configure")
+
+#### 6.2 Deploy JD EntOne
+Documentation: https://docs.oracle.com/en/applications/jd-edwards/one-click-provisioning/9.2/eoiol/deploying-an-orchestration-lc.html#Adding-Additional-Pathcodes-Post-Deployment
+
+From Orchestartion navigate to Deployment tile:
+- Review high level deployment plan and click Start Deplyment
+- deployment logs written to *[root@jde-demo-prov ~]# cd /u01/E1ProvisionPrime/log*
+
+![Step9](images/step_3_1.png "Management Console - Deploy")
+
+![Step10](images/step_3_2.png "Management Console - Deploy")
 
 ---
 

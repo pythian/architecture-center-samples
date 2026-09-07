@@ -594,6 +594,9 @@ gcloud compute instances reset jde-demo-dep --zone="${zone}"
  } 2>&1 | tee -a ${logfile}
 }
 
+## Example Funciton
+
+### not calling functions - but sourcing and running (in case of errors to repeat the function)
 # create_and_dist_opc_key
 # stage_jde_software
 # start_jde_provisioning_server

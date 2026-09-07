@@ -89,8 +89,11 @@ jde_demo_deploy_soft: ## Install JDE requried software on the instances
 	echo "\033[1m>>> Running JDE Software provisioning \033[0m"; \
 	gcloud compute ssh --zone "$$jde_gce_zone" "jde-demo-prov" --tunnel-through-iap --project $(PROJECT_ID_CLEAN) \
 	  --command "source functions.sh; create_and_dist_opc_key;  stage_jde_software;  start_jde_provisioning_server; \
-	   stage_oracle_database;  stage_weblogic;  stage_deployment_server" -- -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20
-
+	   stage_oracle_database;  stage_weblogic;  stage_deployment_server" -- -o TCPKeepAlive=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=20 ; \
+	echo ""; \
+	echo "\033[1m>>> Fetching JDE ocp key  \033[0m"; \
+	gcloud compute ssh  --zone "$$jde_gce_zone" "jde-demo-prov" --tunnel-through-iap \
+		--command="sudo cat /home/opc/.ssh/jde_oneclick_key" > ./jde_oneclick_key.openssh
 
 
 verify-gcp-access: ## Verify GCP access and required IAM roles
