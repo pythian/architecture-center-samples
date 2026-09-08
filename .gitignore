@@ -26,6 +26,7 @@ exascale_outputs.*
 # Ignore key files
 *.pem
 *.pub
+*.openssh
 
 # ExaScale secrets & generated files 
 exadb_private_key.pem
