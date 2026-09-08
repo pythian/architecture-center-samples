@@ -64,7 +64,7 @@ function install_terraform() {
   else
     curl -sSLo terraform.zip \
       "https://releases.hashicorp.com/terraform/${PINNED_TERRAFORM_VERSION}/terraform_${PINNED_TERRAFORM_VERSION}_linux_amd64.zip"
-    unzip -o terraform.zip -d /usr/local/bin
+    sudo unzip -o terraform.zip -d /usr/local/bin
     rm -f terraform.zip
   fi
 }
