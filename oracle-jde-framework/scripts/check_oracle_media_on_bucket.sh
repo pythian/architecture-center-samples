@@ -12,7 +12,12 @@ fi
 
 bucket=${1:-}
 if [[ -z "$bucket" ]]; then
-	read -r -p 'GCS bucket (name or gs:// URI): ' bucket
+	if [[ -t 0 ]]; then
+		read -r -p 'GCS bucket (name or gs:// URI): ' bucket
+	else
+		printf 'Error: GCS bucket is required as an argument in non-interactive environments.\n' >&2
+		exit 2
+	fi
 fi
 
 if [[ -z "$bucket" ]]; then
