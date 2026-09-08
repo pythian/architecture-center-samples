@@ -161,7 +161,7 @@ function users_groups_create()
 function ruby_install() 
 {
     echo " > installing ruby"
-    wget https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.4.tar.gz
+    curl -LO https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.4.tar.gz
     tar -xzf ruby-3.3.4.tar.gz
     chmod 755 -R ruby-3.3.4
     cd ruby-3.3.4
