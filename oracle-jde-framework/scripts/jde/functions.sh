@@ -497,8 +497,8 @@ DECLINE_AUTO_UPDATES=true' > /u01/wls.rsp"
     execute_as_opc jde-demo-web oracle "sed -i 's/SecureListener=true/SecureListener=false/g' /u01/app/wls/user_projects/domains/base_domain/nodemanager/nodemanager.properties"
 
     print_task "Startup Weblogic & NodeManager:"
-    execute_as_opc jde-demo-web oracle "sh -c 'nohup /u01/app/wls/user_projects/domains/base_domain/bin/startNodeManager.sh > /home/oracle/nodemanager.out 2>&1 &'"
-    execute_as_opc jde-demo-web oracle "sh -c 'nohup /u01/app/wls/user_projects/domains/base_domain/startWebLogic.sh > /home/oracle/WebLogic.out 2>&1 &'"
+    execute_as_opc jde-demo-web oracle "sh -c 'nohup /u01/app/wls/user_projects/domains/base_domain/bin/startNodeManager.sh > /home/oracle/nodemanager.out 2>&1 < /dev/null &'"
+    execute_as_opc jde-demo-web oracle "sh -c 'nohup /u01/app/wls/user_projects/domains/base_domain/startWebLogic.sh > /home/oracle/WebLogic.out 2>&1 < /dev/null &'"
 
     ### EOF actual function betweens these comments
     echo -e "\nlog: $logfile"
