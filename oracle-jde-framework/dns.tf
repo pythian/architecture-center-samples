@@ -26,7 +26,7 @@ resource "google_dns_record_set" "jde_demo_server" {
   for_each = local.jde_demo_dns_records
 
   name         = "${each.key}.c.${var.project_id}.internal."
-  managed_zone = google_dns_managed_zone.jde_demo_dns[0].name
+  managed_zone = one(google_dns_managed_zone.jde_demo_dns[*].name)
   type         = "A"
   ttl          = 300
   rrdatas      = [each.value]

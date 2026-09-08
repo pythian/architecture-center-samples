@@ -93,7 +93,7 @@ jde_demo_deploy_soft: ## Install JDE requried software on the instances
 	echo ""; \
 	echo "\033[1m>>> Fetching JDE ocp key  \033[0m"; \
 	gcloud compute ssh  --zone "$$jde_gce_zone" "jde-demo-prov" --tunnel-through-iap \
-		--command="sudo cat /home/opc/.ssh/jde_oneclick_key" > ./jde_oneclick_key.openssh
+		--command="sudo cat /home/opc/.ssh/jde_oneclick_key" > ./jde_oneclick_key.openssh && chmod 600 ./jde_oneclick_key.openssh;
 
 
 verify-gcp-access: ## Verify GCP access and required IAM roles

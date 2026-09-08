@@ -521,7 +521,7 @@ stage_deployment_server() {
      print_task "Create OPC user in Windows Deployment Server"
      zone=$(gcloud compute instances list --filter="name=$(hostname)" --format="value(zone)")
      gcloud compute reset-windows-password jde-demo-dep --user=opc --zone=${zone} --quiet | tee -a /tmp/opc_user.txt
-     pw=$(grep password /tmp/opc_user.txt | awk '{print $2}')
+     
 
 #     print_task "Reset OPC user password in Windows Deployment Server to match requriemnets"
 #     gcloud compute instances add-metadata jde-demo-dep --zone=${zone} --metadata windows-startup-script-ps1="net user opc Your_Password+132"
