@@ -110,7 +110,8 @@ function update_os_config()
 
     # OPC as sudoers
     echo "Adding opc user to sudoers"
-    echo "opc ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+    echo "opc ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/opc
+    chmod 0440 /etc/sudoers.d/opc
 
     # /etc/ssh/sshd_config update
     echo "Updating /etc/ssh/sshd_config"
