@@ -86,6 +86,10 @@ function verify_and_install() {
 
   install_gcloud
 
+  if ! command -v make &>/dev/null; then
+    install_make
+  fi
+
   # # pre-commit
   # if command -v pre-commit &>/dev/null; then
   #   INSTALLED_VERSION=$(pre-commit --version | awk '{print $3}')
