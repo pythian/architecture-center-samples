@@ -363,7 +363,7 @@ resource "google_compute_instance" "jde_demo_dep" {
   }
 
   metadata = {
-    enable-oslogin = "TRUE"
+    enable-oslogin             = "TRUE"
     windows-startup-script-ps1 = file("${path.module}/scripts/jde-win-startup.bat")
   }
 
