@@ -22,7 +22,7 @@ locals {
 
     db = [
       "http-server",
-      "https-server",
+      "https-server",is_vision_gce
       "lb-health-check",
       "oracle-ebs-apps",
       "iap-access",

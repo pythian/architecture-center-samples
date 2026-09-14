@@ -65,24 +65,7 @@ module "cloud_router" {
   depends_on = [module.network, google_compute_address.nat_ip]
 }
 
-resource "google_compute_address" "ebs_apps_server_internal_ip" {
-  count        = var.oracle_jde_vision ? 0 : 1
-  name         = "ebs-apps-server-internal-ip"
-  region       = var.region
-  address_type = "INTERNAL"
-  subnetwork   = values(module.network.subnets)[0].name
-  address      = var.ebs_apps_server_internal_ip
-}
-
-resource "google_compute_address" "ebs_db_server_internal_ip" {
-  count        = var.oracle_jde_vision ? 0 : 1
-  name         = "ebs-db-server-internal-ip"
-  region       = var.region
-  address_type = "INTERNAL"
-  subnetwork   = values(module.network.subnets)[0].name
-  address      = var.ebs_db_server_internal_ip
-}
-
+# JDE DEMO
 resource "google_compute_address" "jde_demo_prov_server_internal_ip" {
   count        = var.oracle_jde_vision ? 1 : 0
   name         = "jde-demo-prov-server-internal-ip"
@@ -127,3 +110,51 @@ resource "google_compute_address" "jde_demo_dep_server_internal_ip" {
   subnetwork   = values(module.network.subnets)[0].name
   address      = var.jde_demo_dep_server_internal_ip
 }
+
+
+# JDE Customer Data
+resource "google_compute_address" "jde_prov_server_internal_ip" {
+  count        = var.oracle_jde_vision ? 0 : 1
+  name         = "jde-prov-server-internal-ip"
+  region       = var.region
+  address_type = "INTERNAL"
+  subnetwork   = values(module.network.subnets)[0].name
+  address      = var.jde_prov_server_internal_ip
+}
+
+resource "google_compute_address" "jde_db_server_internal_ip" {
+  count        = var.oracle_jde_vision ? 0 : 1
+  name         = "jde-db-server-internal-ip"
+  region       = var.region
+  address_type = "INTERNAL"
+  subnetwork   = values(module.network.subnets)[0].name
+  address      = var.jde_db_server_internal_ip
+}
+
+resource "google_compute_address" "jde_ent_server_internal_ip" {
+  count        = var.oracle_jde_vision ? 0 : 1
+  name         = "jde-server-internal-ip"
+  region       = var.region
+  address_type = "INTERNAL"
+  subnetwork   = values(module.network.subnets)[0].name
+  address      = var.jde_ent_server_internal_ip
+}
+
+resource "google_compute_address" "jde_web_server_internal_ip" {
+  count        = var.oracle_jde_vision ? 0 : 1
+  name         = "jde-web-server-internal-ip"
+  region       = var.region
+  address_type = "INTERNAL"
+  subnetwork   = values(module.network.subnets)[0].name
+  address      = var.jde_web_server_internal_ip
+}
+
+resource "google_compute_address" "jde_dep_server_internal_ip" {
+  count        = var.oracle_jde_vision ? 0 : 1
+  name         = "jde-dep-server-internal-ip"
+  region       = var.region
+  address_type = "INTERNAL"
+  subnetwork   = values(module.network.subnets)[0].name
+  address      = var.jde_dep_server_internal_ip
+}
+

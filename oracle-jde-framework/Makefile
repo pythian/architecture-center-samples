@@ -138,3 +138,21 @@ verify-gcp-access: ## Verify GCP access and required IAM roles
 	echo ""; \
 	echo " GCP access check passed for project: $(PROJECT_ID_CLEAN)"
 
+# JDE Client Data Setup
+jde_cust_data_plan: ## Plan Terraform configuration with Oracle EBS Vision
+	terraform -chdir=$(TF_DIR) plan \
+	  -var="project_id=$(PROJECT_ID_CLEAN)" \
+	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)" \
+	  -var="oracle_jde_vision=false"
+
+jde_cust_data_deploy: ## Apply Terraform configuration with Oracle EBS Vision
+	terraform -chdir=$(TF_DIR) apply -auto-approve \
+	  -var="project_id=$(PROJECT_ID_CLEAN)" \
+	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)" \
+	  -var="oracle_jde_vision=false"
+
+jde_cust_data_destroy: ## Destroy Terraform configuration with Oracle EBS Vision
+	terraform -chdir=$(TF_DIR) destroy -auto-approve \
+	  -var="project_id=$(PROJECT_ID_CLEAN)" \
+	  -var="project_service_account_email=$(PROJECT_SA_EMAIL)" \
+	  -var="oracle_jde_vision=false"
