@@ -41,7 +41,7 @@ init: ## Initialize Terraform configuration
 	echo "Initializing Terraform in $(TF_DIR)..."; \
 	terraform -chdir=$(TF_DIR) init -reconfigure \
 		-backend-config="bucket=$(PROJECT_ID_CLEAN)-$${PROJECT_NUMBER}-terraform-state" \
-		-backend-config="prefix=$(PROJECT_ID_CLEAN)"
+		-backend-config="prefix=jde"
 	@echo "Terraform initialized successfully."
 
 format: ## Format Terraform files
