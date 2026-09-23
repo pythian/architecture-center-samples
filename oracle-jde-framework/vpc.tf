@@ -1,6 +1,6 @@
 module "network" {
   source                                 = "terraform-google-modules/network/google"
-  version                                = "~> 9.2"
+  version                                = "~> 18.1"
   project_id                             = var.project_id
   network_name                           = var.network_name
   delete_default_internet_gateway_routes = var.delete_default_internet_gateway_routes
@@ -12,7 +12,7 @@ module "network" {
 
 module "nat_gateway_route" {
   source  = "terraform-google-modules/network/google//modules/routes"
-  version = "9.3.0"
+  version = "~> 18.1"
 
   project_id   = var.project_id
   network_name = module.network.network_name
@@ -22,7 +22,7 @@ module "nat_gateway_route" {
       name              = "nat-jde-egress-internet"
       description       = "Public NAT GW - route through IGW to access internet"
       destination_range = "0.0.0.0/0"
-      tags              = "egress-nat"
+      tags              = ["egress-nat"]
       next_hop_internet = "true"
     }
   ]
@@ -52,9 +52,9 @@ locals {
 }
 
 module "cloud_router" {
-  source  = "terraform-google-modules/cloud-router/google"
-  version = "6.1.0"
-  project = var.project_id
+  source     = "terraform-google-modules/cloud-router/google"
+  version    = "~> 9.0"
+  project_id = var.project_id
 
   name    = "${var.network_name}-cloud-router"
   network = module.network.network_name
