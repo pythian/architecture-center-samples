@@ -111,11 +111,11 @@ EOT
 ----------------------------------------------------------------------------------
  Local /etc/hosts file for IAP tunneling
 ----------------------------------------------------------------------------------
-   127.0.0.1 ${try(google_compute_instance.jde_prov[0].name, "N/A")}.c.${var.project_id}.${var.region}.internal ${try(google_compute_instance.jde_prov[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_db[0].name, "N/A")}.c.${var.project_id}.${var.region}.internal ${try(google_compute_instance.jde_db[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_ent[0].name, "N/A")}.c.${var.project_id}.${var.region}.internal ${try(google_compute_instance.jde_ent[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_web[0].name, "N/A")}.c.${var.project_id}.${var.region}.internal ${try(google_compute_instance.jde_web[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_dep[0].name, "N/A")}.c.${var.project_id}.${var.region}.internal ${try(google_compute_instance.jde_dep[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_prov[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_prov[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_db[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_db[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_ent[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_ent[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_web[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_web[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_dep[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_dep[0].name, "N/A")}
 ----------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
