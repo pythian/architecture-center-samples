@@ -11,11 +11,11 @@ resource "google_dns_managed_zone" "jde_demo_dns" {
 
 locals {
   jde_demo_dns_records = var.oracle_jde_vision ? {
-    (var.jde_demo_prov_vm_name) = google_compute_address.jde_demo_prov_server_internal_ip[0].address
-    (var.jde_demo_db_vm_name)   = google_compute_address.jde_demo_db_server_internal_ip[0].address
-    (var.jde_demo_ent_vm_name)  = google_compute_address.jde_demo_ent_server_internal_ip[0].address
-    (var.jde_demo_web_vm_name)  = google_compute_address.jde_demo_web_server_internal_ip[0].address
-    (var.jde_demo_dep_vm_name)  = google_compute_address.jde_demo_dep_server_internal_ip[0].address
+    (var.jde_demo_prov_vm_name) = try(google_compute_address.jde_demo_prov_server_internal_ip[0].address, "")
+    (var.jde_demo_db_vm_name)   = try(google_compute_address.jde_demo_db_server_internal_ip[0].address, "")
+    (var.jde_demo_ent_vm_name)  = try(google_compute_address.jde_demo_ent_server_internal_ip[0].address, "")
+    (var.jde_demo_web_vm_name)  = try(google_compute_address.jde_demo_web_server_internal_ip[0].address, "")
+    (var.jde_demo_dep_vm_name)  = try(google_compute_address.jde_demo_dep_server_internal_ip[0].address, "")
   } : {}
 }
 
@@ -52,11 +52,11 @@ resource "google_dns_managed_zone" "jde_dns" {
 
 locals {
   jde_dns_records = (var.oracle_jde_vision ? {} : {
-    (var.jde_prov_vm_name) = google_compute_address.jde_prov_server_internal_ip[0].address
-    (var.jde_db_vm_name)   = google_compute_address.jde_db_server_internal_ip[0].address
-    (var.jde_ent_vm_name)  = google_compute_address.jde_ent_server_internal_ip[0].address
-    (var.jde_web_vm_name)  = google_compute_address.jde_web_server_internal_ip[0].address
-    (var.jde_dep_vm_name)  = google_compute_address.jde_dep_server_internal_ip[0].address
+    (var.jde_prov_vm_name) = try(google_compute_address.jde_prov_server_internal_ip[0].address, "")
+    (var.jde_db_vm_name)   = try(google_compute_address.jde_db_server_internal_ip[0].address, "")
+    (var.jde_ent_vm_name)  = try(google_compute_address.jde_ent_server_internal_ip[0].address, "")
+    (var.jde_web_vm_name)  = try(google_compute_address.jde_web_server_internal_ip[0].address, "")
+    (var.jde_dep_vm_name)  = try(google_compute_address.jde_dep_server_internal_ip[0].address, "")
   })
 }
 
