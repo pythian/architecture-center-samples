@@ -195,15 +195,6 @@ resource "null_resource" "exascale_ingress_rules" {
             "source": "${self.triggers.vpc_cidr}",
             "sourceType": "CIDR_BLOCK",
             "tcpOptions": {
-              "destinationPortRange": {"max": 1521, "min": 1521}
-            }
-          },
-          {
-            "direction": "INGRESS",
-            "protocol": "6",
-            "source": "${self.triggers.vpc_cidr}",
-            "sourceType": "CIDR_BLOCK",
-            "tcpOptions": {
               "destinationPortRange": {"max": 14510, "min": 14502}
             }
           }
