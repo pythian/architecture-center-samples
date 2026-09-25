@@ -52,12 +52,11 @@ output "deployment_summary" {
 ----------------------------------------------------------------------------------
  Local /etc/hosts file for IAP tunneling
 ----------------------------------------------------------------------------------
-   127.0.0.1 ${try(google_compute_instance.jde_demo_prov[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_prov[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_demo_db[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_db[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_demo_ent[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_ent[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_demo_web[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_web[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_demo_dep[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_dep[0].name, "N/A")}
-
+   127.0.0.1 ${try(google_compute_instance.jde_demo_prov[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_prov[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_prov[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_demo_db[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_db[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_db[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_demo_ent[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_ent[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_ent[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_demo_web[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_web[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_web[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_demo_dep[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_dep[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_demo_dep[0].name, "N/A")}
 ----------------------------------------------------------------------------------
  Storage
 ----------------------------------------------------------------------------------
@@ -111,12 +110,12 @@ EOT
 ----------------------------------------------------------------------------------
  Local /etc/hosts file for IAP tunneling
 ----------------------------------------------------------------------------------
-   127.0.0.1 ${try(google_compute_instance.jde_prov[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_prov[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_db[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_db[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_ent[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_ent[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_web[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_web[0].name, "N/A")}
-   127.0.0.1 ${try(google_compute_instance.jde_dep[0].name, "N/A")}.c.${var.region}.${var.project_id}.internal ${try(google_compute_instance.jde_dep[0].name, "N/A")}
-----------------------------------------------------------------------------------
+   127.0.0.1 ${try(google_compute_instance.jde_prov[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_prov[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_prov[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_db[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_db[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_db[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_ent[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_ent[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_ent[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_web[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_web[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_web[0].name, "N/A")}
+   127.0.0.1 ${try(google_compute_instance.jde_dep[0].name, "N/A")}.c.${var.project_id}.internal ${try(google_compute_instance.jde_dep[0].name, "N/A")}.${var.zone}.c.${var.project_id}.internal ${try(google_compute_instance.jde_dep[0].name, "N/A")}
+---------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
  Storage

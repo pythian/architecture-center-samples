@@ -1,15 +1,11 @@
 # JDE DEMO
 resource "google_dns_managed_zone" "jde_demo_dns" {
-  count = var.oracle_jde_vision ? 1 : 0
-
+  count      = var.oracle_jde_vision ? 1 : 0
   name       = "jde-demo-dns"
   dns_name   = "${var.project_id}.internal."
   visibility = "private"
-
   private_visibility_config {
-    networks {
-      network_url = module.network.network_self_link
-    }
+    networks { network_url = module.network.network_self_link }
   }
 }
 
@@ -23,29 +19,34 @@ locals {
   } : {}
 }
 
-resource "google_dns_record_set" "jde_demo_server" {
-  for_each = local.jde_demo_dns_records
-
-  name         = "${each.key}.c.${var.region}.${var.project_id}.internal."
+# 1. Global DNS Records
+resource "google_dns_record_set" "jde_demo_server_global" {
+  for_each     = local.jde_demo_dns_records
+  name         = "${each.key}.c.${var.project_id}.internal."
   managed_zone = one(google_dns_managed_zone.jde_demo_dns[*].name)
   type         = "A"
   ttl          = 300
   rrdatas      = [each.value]
 }
 
+# 2. Zonal DNS Records
+resource "google_dns_record_set" "jde_demo_server_zonal" {
+  for_each     = local.jde_demo_dns_records
+  name         = "${each.key}.${var.zone}.c.${var.project_id}.internal."
+  managed_zone = one(google_dns_managed_zone.jde_demo_dns[*].name)
+  type         = "A"
+  ttl          = 300
+  rrdatas      = [each.value]
+}
 
 # JDE Customer Data
 resource "google_dns_managed_zone" "jde_dns" {
-  count = var.oracle_jde_vision ? 0 : 1
-
+  count      = var.oracle_jde_vision ? 0 : 1
   name       = "jde-dns"
   dns_name   = "${var.project_id}.internal."
   visibility = "private"
-
   private_visibility_config {
-    networks {
-      network_url = module.network.network_self_link
-    }
+    networks { network_url = module.network.network_self_link }
   }
 }
 
@@ -59,10 +60,20 @@ locals {
   })
 }
 
-resource "google_dns_record_set" "jde_server" {
-  for_each = local.jde_dns_records
+# 1. Global DNS Records
+resource "google_dns_record_set" "jde_server_global" {
+  for_each     = local.jde_dns_records
+  name         = "${each.key}.c.${var.project_id}.internal."
+  managed_zone = one(google_dns_managed_zone.jde_dns[*].name)
+  type         = "A"
+  ttl          = 300
+  rrdatas      = [each.value]
+}
 
-  name         = "${each.key}.c.${var.region}.${var.project_id}.internal."
+# 2. Zonal DNS Records
+resource "google_dns_record_set" "jde_server_zonal" {
+  for_each     = local.jde_dns_records
+  name         = "${each.key}.${var.zone}.c.${var.project_id}.internal."
   managed_zone = one(google_dns_managed_zone.jde_dns[*].name)
   type         = "A"
   ttl          = 300
