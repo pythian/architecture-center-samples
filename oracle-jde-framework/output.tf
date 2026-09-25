@@ -132,7 +132,7 @@ EOT
 }
 
 output "exascale_deployment_summary" {
-  value       = <<-EOT
+   value = var.oracle_jde_exascale ? (<<-EOT
 
 =========================================
  Oracle jde on ExaScale @ GCP
@@ -156,5 +156,6 @@ output "exascale_deployment_summary" {
    Connection   : ./exascale_outputs.yaml (TNS, SCAN DNS)
 =========================================
 EOT
+   ) : ""
   description = "Summary of Oracle jde on ExaScale deployment."
 }

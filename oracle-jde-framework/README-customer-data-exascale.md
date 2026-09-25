@@ -142,6 +142,10 @@ Oracle Database at Exascale@GCP will already be pre-created with emtpy pluggalbe
 
 GCP subnet has TCP:1521 connectivity enabled so database will be available fron JDE subnet to all application tier services for further applcation restore.
 
+*Note: This tool will provide an SSH key (exadb_private_key.pem) that can be used to ssh into the Exascale VM as the os user oracle*
+
+*Note2: Exascale doesn't have direct access to GCP Cloud Storage; use the jde-db server as an intermediate placeholder or see [migration guides](https://docs.oracle.com/en-us/iaas/Content/Database/Tasks/migrating.htm)*
+
 ---
 
 ### 5. Access Environment
