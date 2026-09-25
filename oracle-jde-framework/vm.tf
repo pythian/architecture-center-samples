@@ -257,7 +257,7 @@ resource "google_compute_instance" "jde_demo_dep" {
 
   metadata = {
     enable-oslogin             = "TRUE"
-    windows-startup-script-ps1 = file("${path.module}/scripts/jde-win-startup.bat")
+    windows-startup-script-ps1 = file("${path.module}/scripts/jde-win-startup.ps1")
   }
 
   tags = local.vm_network_tags.vision
@@ -528,7 +528,7 @@ resource "google_compute_instance" "jde_dep" {
 
   metadata = {
     enable-oslogin             = "TRUE"
-    windows-startup-script-ps1 = file("${path.module}/scripts/jde-win-startup_cust.bat")
+    windows-startup-script-ps1 = file("${path.module}/scripts/jde-win-startup_cust.ps1")
   }
 
   tags = local.vm_network_tags.vision
